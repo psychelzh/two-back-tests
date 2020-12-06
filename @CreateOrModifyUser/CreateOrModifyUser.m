@@ -19,6 +19,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
     properties (Access = private)
         CallingApp % Store the calling app
         CallingMethod % Modify or create
+        CallingUserId % User id in calling app
         IsChanged = false % If value has been changed
     end
     
@@ -68,6 +69,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
                 case "Modification"
                     app.CallingApp.updateUser(user);
             end
+            app.CallingApp.outputUsersHistory();
             % let main app be ready for work
             app.CallingApp.getReady();
         end
@@ -91,6 +93,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
                 app.UserName.Value = user.Name;
                 app.UserSex.Value = user.Sex;
                 app.UserDob.Value = user.Dob;
+                app.CallingUserId = user.Id;
             end
         end
 
@@ -133,6 +136,31 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
         % Value changed function: UserId
         function UserIdValueChanged(app, event)
             app.IsChanged = true;
+            if ~isempty(app.CallingApp.UsersHistory)
+                is_used = ismember(event.Value, app.CallingApp.UsersHistory.Id);
+            else
+                is_used = false;
+            end
+            if is_used
+                switch app.CallingMethod
+                    case "Creation"
+                        selection = uiconfirm(app.UIFigure, ...
+                            "当前编号已经使用过，请选择操作：", "编号重复", ...
+                            "Options", ["删除旧被试并继续", "返回重新输入"], ...
+                            "DefaultOption", "返回重新输入");
+                        switch selection
+                            case "删除旧被试并继续"
+                                app.CallingApp.UsersHistory(is_used, :) = [];
+                            case "返回重新输入"
+                                app.UserId.Value = 0;
+                        end
+                    case "Modification"
+                        uialert(app.UIFigure, ...
+                            "不允许修改为已有用户的编号", "编号重复", ...
+                            "Icon", "error")
+                        app.UserId.Value = app.CallingUserId;
+                end
+            end
         end
 
         % Value changed function: UserName

@@ -11,7 +11,7 @@ classdef StartExperiment < matlab.apps.AppBase
         UserSex               matlab.ui.control.Label
         UserDob               matlab.ui.control.Label
         Modify                matlab.ui.control.Button
-        CurrentUser           matlab.ui.control.Label
+        UserInfoLabel         matlab.ui.control.Label
         Create                matlab.ui.control.Button
         UserIdLabel           matlab.ui.control.Label
         UserId                matlab.ui.control.Label
@@ -35,6 +35,16 @@ classdef StartExperiment < matlab.apps.AppBase
         UserCreateTime % Store the time when user is created
     end
     
+    properties (Access = public)
+        UsersHistory % users load from disk
+        UserCurrent % current user
+    end
+    
+    properties (Access = private, Constant)
+        AssetsFolder = "assets" % store data used in app building
+        UsersHistoryFile = "users_history.txt" % store users history
+    end
+    
     methods (Access = private)
         
         function initialize(app)
@@ -54,11 +64,27 @@ classdef StartExperiment < matlab.apps.AppBase
     methods (Access = public)
         
         function updateUser(app, user)
-            % public method interchanges user info between apps
+            % update current user info
             app.UserId.Text = num2str(user.Id);
             app.UserName.Text = user.Name;
             app.UserSex.Text = user.Sex;
             app.UserDob.Text = datestr(user.Dob, 'yyyy-mm-dd');
+            app.UserCurrent(:, fieldnames(user)) = struct2table(user);
+        end
+        
+        function createUser(app, user)
+            % set the user creation time
+            app.UserCreateTime = datetime("now");
+            % update user info
+            app.updateUser(user);
+            % store user progress
+            app.UserCurrent = addvars(app.UserCurrent, ...
+                "created", 'NewVariableNames', 'progress');
+        end
+        
+        function outputUsersHistory(app)
+            writetable(vertcat(app.UsersHistory, app.UserCurrent), ...
+                fullfile(app.AssetsFolder, app.UsersHistoryFile))
         end
         
         function getReady(app)
@@ -79,12 +105,6 @@ classdef StartExperiment < matlab.apps.AppBase
             app.SpaceTest.Enable = "off";
         end
         
-        function createUser(app, user)
-            % set the user creation time
-            app.UserCreateTime = datetime("now");
-            % update user info
-            app.updateUser(user);
-        end
     end
     
 
@@ -93,10 +113,28 @@ classdef StartExperiment < matlab.apps.AppBase
 
         % Code that executes after component creation
         function startupFcn(app)
+            % make sure data folder is existing
+            if ~exist(app.AssetsFolder, "dir")
+                mkdir(app.AssetsFolder)
+            end
+            history_file = fullfile(app.AssetsFolder, app.UsersHistoryFile);
+            if exist(history_file, "file")
+                app.UsersHistory = readtable(history_file, 'TextType', 'string');
+            else
+                app.UsersHistory = table;
+            end
+            app.UserCurrent = table;
             % initialize all the controllers
             app.initialize()
             % add user code directory
             addpath("src")
+        end
+
+        % Close request function: UIFigure
+        function UIFigureCloseRequest(app, event)
+            delete(app)
+            % remove user code directory
+            rmpath("src")
         end
 
         % Button pushed function: Create
@@ -110,13 +148,6 @@ classdef StartExperiment < matlab.apps.AppBase
             % Enable creation after calling
             waitfor(app.DialogEditUser.UIFigure)
             app.Create.Enable = "on";
-        end
-
-        % Close request function: UIFigure
-        function UIFigureCloseRequest(app, event)
-            delete(app)
-            % remove user code directory
-            rmpath("src")
         end
 
         % Button pushed function: Modify
@@ -207,12 +238,12 @@ classdef StartExperiment < matlab.apps.AppBase
             app.Modify.Position = [33 50 88 26];
             app.Modify.Text = '修改';
 
-            % Create CurrentUser
-            app.CurrentUser = uilabel(app.ParticipantInfoPanel);
-            app.CurrentUser.FontName = 'SimHei';
-            app.CurrentUser.FontSize = 20;
-            app.CurrentUser.Position = [87 247 85 26];
-            app.CurrentUser.Text = '当前被试';
+            % Create UserInfoLabel
+            app.UserInfoLabel = uilabel(app.ParticipantInfoPanel);
+            app.UserInfoLabel.FontName = 'SimHei';
+            app.UserInfoLabel.FontSize = 20;
+            app.UserInfoLabel.Position = [87 247 85 26];
+            app.UserInfoLabel.Text = '当前被试';
 
             % Create Create
             app.Create = uibutton(app.ParticipantInfoPanel, 'push');
