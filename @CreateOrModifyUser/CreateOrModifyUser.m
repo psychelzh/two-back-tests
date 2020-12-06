@@ -121,10 +121,12 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
 
         % Button pushed function: Confirm
         function ConfirmButtonPushed(app, event)
-            % ensure values are valid and set up main app before exiting
-            ok = app.validateInfo();
-            if ~ok, return; end
-            app.setupMainApp();
+            if app.IsChanged
+                % ensure values are valid and set up main app before exiting
+                ok = app.validateInfo();
+                if ~ok, return; end
+                app.setupMainApp();
+            end
             delete(app)
         end
 
