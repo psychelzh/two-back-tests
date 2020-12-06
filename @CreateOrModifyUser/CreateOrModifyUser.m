@@ -81,7 +81,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
         function startupFcn(app, mainApp, user)
             % Store main app object
             app.CallingApp = mainApp;
-            if (~exist('user', 'var'))
+            if ~exist('user', 'var')
                 app.UsingMethod = "Creation";
                 app.MainTitle.Text = '新建被试';
             else
