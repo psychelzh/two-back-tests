@@ -96,8 +96,8 @@ classdef StartExperiment < matlab.apps.AppBase
             app.Create.Enable = "off";
             % Call app without user information
             app.DialogEditUser = CreateOrModifyUser(app);
+            % Enable creation after calling
             waitfor(app.DialogEditUser.UIFigure)
-            % Enable creation after creation
             app.Create.Enable = "on";
         end
 
@@ -119,6 +119,10 @@ classdef StartExperiment < matlab.apps.AppBase
             user.Sex = app.UserSex.Text;
             user.Dob = datetime(app.UserDob.Text);
             app.DialogEditUser = CreateOrModifyUser(app, user);
+            % Enable creation and modification after calling
+            waitfor(app.DialogEditUser.UIFigure)
+            app.Create.Enable = "on";
+            app.Modify.Enable = "on";
         end
     end
 
