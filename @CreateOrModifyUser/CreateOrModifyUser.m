@@ -18,7 +18,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
     
     properties (Access = private)
         CallingApp % Store the calling app
-        UsingMethod % Modify or create
+        CallingMethod % Modify or create
         IsChanged = false % If value has been changed
     end
     
@@ -62,7 +62,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             user.Name = app.UserName.Value;
             user.Sex = app.UserSex.Value;
             user.Dob = app.UserDob.Value;
-            switch app.UsingMethod
+            switch app.CallingMethod
                 case "Creation"
                     app.CallingApp.createUser(user);
                 case "Modification"
@@ -82,10 +82,10 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             % Store main app object
             app.CallingApp = mainApp;
             if ~exist('user', 'var')
-                app.UsingMethod = "Creation";
+                app.CallingMethod = "Creation";
                 app.MainTitle.Text = '新建被试';
             else
-                app.UsingMethod = "Modification";
+                app.CallingMethod = "Modification";
                 app.MainTitle.Text = '修改信息';
                 app.UserId.Value = user.Id;
                 app.UserName.Value = user.Name;
@@ -97,7 +97,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
         % Close request function: UIFigure
         function UIFigureCloseRequest(app, event)
             if app.IsChanged
-                switch app.UsingMethod
+                switch app.CallingMethod
                     case "Creation"
                         msg = "是否录入当前用户信息？";
                     case "Modification"
@@ -111,7 +111,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
                     % update user info in main app
                     ok = app.validateInfo();
                     if ~ok, return; end
-                    if app.UsingMethod == "Creation"
+                    if app.CallingMethod == "Creation"
                         app.setupMainApp();
                     end
                 end
