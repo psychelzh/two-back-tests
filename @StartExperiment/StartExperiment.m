@@ -18,12 +18,15 @@ classdef StartExperiment < matlab.apps.AppBase
         DigitPanel            matlab.ui.container.Panel
         DigitPrac             matlab.ui.control.Button
         DigitTest             matlab.ui.control.Button
+        DigitLabel            matlab.ui.control.Label
         WordPanel             matlab.ui.container.Panel
         WordPrac              matlab.ui.control.Button
         WordTest              matlab.ui.control.Button
+        WordLabel             matlab.ui.control.Label
         SpacePanel            matlab.ui.container.Panel
         SpacePrac             matlab.ui.control.Button
         SpaceTest             matlab.ui.control.Button
+        SpaceLabel            matlab.ui.control.Label
     end
 
     
@@ -148,7 +151,6 @@ classdef StartExperiment < matlab.apps.AppBase
 
             % Create ParticipantInfoPanel
             app.ParticipantInfoPanel = uipanel(app.UIFigure);
-            app.ParticipantInfoPanel.Title = 'ParticipantInfo';
             app.ParticipantInfoPanel.Position = [271 283 260 292];
 
             % Create UserNameLabel
@@ -156,21 +158,21 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserNameLabel.HorizontalAlignment = 'center';
             app.UserNameLabel.FontName = 'SimHei';
             app.UserNameLabel.FontSize = 15;
-            app.UserNameLabel.Position = [56 145 35 22];
+            app.UserNameLabel.Position = [56 164 35 22];
             app.UserNameLabel.Text = '姓名';
 
             % Create UserSexLabel
             app.UserSexLabel = uilabel(app.ParticipantInfoPanel);
             app.UserSexLabel.FontName = 'SimHei';
             app.UserSexLabel.FontSize = 15;
-            app.UserSexLabel.Position = [56 108 35 22];
+            app.UserSexLabel.Position = [56 127 35 22];
             app.UserSexLabel.Text = '性别';
 
             % Create UserDobLabel
             app.UserDobLabel = uilabel(app.ParticipantInfoPanel);
             app.UserDobLabel.FontName = 'SimHei';
             app.UserDobLabel.FontSize = 15;
-            app.UserDobLabel.Position = [56 72 35 22];
+            app.UserDobLabel.Position = [56 91 35 22];
             app.UserDobLabel.Text = '生日';
 
             % Create UserName
@@ -178,7 +180,7 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserName.HorizontalAlignment = 'center';
             app.UserName.FontName = 'SimHei';
             app.UserName.FontSize = 15;
-            app.UserName.Position = [103 145 101 22];
+            app.UserName.Position = [103 164 101 22];
             app.UserName.Text = '未注册';
 
             % Create UserSex
@@ -186,7 +188,7 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserSex.HorizontalAlignment = 'center';
             app.UserSex.FontName = 'SimHei';
             app.UserSex.FontSize = 15;
-            app.UserSex.Position = [103 108 101 22];
+            app.UserSex.Position = [103 127 101 22];
             app.UserSex.Text = '未注册';
 
             % Create UserDob
@@ -194,7 +196,7 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserDob.HorizontalAlignment = 'center';
             app.UserDob.FontName = 'SimHei';
             app.UserDob.FontSize = 15;
-            app.UserDob.Position = [103 72 101 22];
+            app.UserDob.Position = [103 91 101 22];
             app.UserDob.Text = '未注册';
 
             % Create Modify
@@ -202,14 +204,14 @@ classdef StartExperiment < matlab.apps.AppBase
             app.Modify.ButtonPushedFcn = createCallbackFcn(app, @ModifyButtonPushed, true);
             app.Modify.FontName = 'SimHei';
             app.Modify.FontSize = 15;
-            app.Modify.Position = [33 31 88 26];
+            app.Modify.Position = [33 50 88 26];
             app.Modify.Text = '修改';
 
             % Create CurrentUser
             app.CurrentUser = uilabel(app.ParticipantInfoPanel);
             app.CurrentUser.FontName = 'SimHei';
             app.CurrentUser.FontSize = 20;
-            app.CurrentUser.Position = [87 228 85 26];
+            app.CurrentUser.Position = [87 247 85 26];
             app.CurrentUser.Text = '当前被试';
 
             % Create Create
@@ -217,14 +219,14 @@ classdef StartExperiment < matlab.apps.AppBase
             app.Create.ButtonPushedFcn = createCallbackFcn(app, @CreateButtonPushed, true);
             app.Create.FontName = 'SimHei';
             app.Create.FontSize = 15;
-            app.Create.Position = [144 31 88 26];
+            app.Create.Position = [144 50 88 26];
             app.Create.Text = '新建';
 
             % Create UserIdLabel
             app.UserIdLabel = uilabel(app.ParticipantInfoPanel);
             app.UserIdLabel.FontName = 'SimHei';
             app.UserIdLabel.FontSize = 15;
-            app.UserIdLabel.Position = [55 182 35 22];
+            app.UserIdLabel.Position = [55 201 35 22];
             app.UserIdLabel.Text = '编号';
 
             % Create UserId
@@ -232,65 +234,87 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserId.HorizontalAlignment = 'center';
             app.UserId.FontName = 'SimHei';
             app.UserId.FontSize = 15;
-            app.UserId.Position = [103 182 101 22];
+            app.UserId.Position = [103 201 101 22];
             app.UserId.Text = '未注册';
 
             % Create DigitPanel
             app.DigitPanel = uipanel(app.UIFigure);
-            app.DigitPanel.Title = 'Digit';
-            app.DigitPanel.Position = [92 40 196 208];
+            app.DigitPanel.TitlePosition = 'centertop';
+            app.DigitPanel.Position = [78 40 196 208];
 
             % Create DigitPrac
             app.DigitPrac = uibutton(app.DigitPanel, 'push');
             app.DigitPrac.FontName = 'SimHei';
             app.DigitPrac.FontSize = 15;
-            app.DigitPrac.Position = [48 135 100 26];
+            app.DigitPrac.Position = [47 124 100 26];
             app.DigitPrac.Text = '练习';
 
             % Create DigitTest
             app.DigitTest = uibutton(app.DigitPanel, 'push');
             app.DigitTest.FontName = 'SimHei';
             app.DigitTest.FontSize = 15;
-            app.DigitTest.Position = [48 63 100 26];
+            app.DigitTest.Position = [47 52 100 26];
             app.DigitTest.Text = '正式测试';
+
+            % Create DigitLabel
+            app.DigitLabel = uilabel(app.DigitPanel);
+            app.DigitLabel.HorizontalAlignment = 'center';
+            app.DigitLabel.FontName = 'SimHei';
+            app.DigitLabel.FontSize = 15;
+            app.DigitLabel.Position = [79 171 35 22];
+            app.DigitLabel.Text = '数字';
 
             % Create WordPanel
             app.WordPanel = uipanel(app.UIFigure);
-            app.WordPanel.Title = 'Word';
-            app.WordPanel.Position = [303 40 196 208];
+            app.WordPanel.Position = [304 40 196 208];
 
             % Create WordPrac
             app.WordPrac = uibutton(app.WordPanel, 'push');
             app.WordPrac.FontName = 'SimHei';
             app.WordPrac.FontSize = 15;
-            app.WordPrac.Position = [48 135 100 26];
+            app.WordPrac.Position = [48 124 100 26];
             app.WordPrac.Text = '练习';
 
             % Create WordTest
             app.WordTest = uibutton(app.WordPanel, 'push');
             app.WordTest.FontName = 'SimHei';
             app.WordTest.FontSize = 15;
-            app.WordTest.Position = [49 63 100 26];
+            app.WordTest.Position = [49 52 100 26];
             app.WordTest.Text = '正式测试';
+
+            % Create WordLabel
+            app.WordLabel = uilabel(app.WordPanel);
+            app.WordLabel.HorizontalAlignment = 'center';
+            app.WordLabel.FontName = 'SimHei';
+            app.WordLabel.FontSize = 15;
+            app.WordLabel.Position = [81 171 35 22];
+            app.WordLabel.Text = '文字';
 
             % Create SpacePanel
             app.SpacePanel = uipanel(app.UIFigure);
-            app.SpacePanel.Title = 'Space';
-            app.SpacePanel.Position = [514 40 196 208];
+            app.SpacePanel.Position = [530 40 196 208];
 
             % Create SpacePrac
             app.SpacePrac = uibutton(app.SpacePanel, 'push');
             app.SpacePrac.FontName = 'SimHei';
             app.SpacePrac.FontSize = 15;
-            app.SpacePrac.Position = [48 135 100 26];
+            app.SpacePrac.Position = [48 124 100 26];
             app.SpacePrac.Text = '练习';
 
             % Create SpaceTest
             app.SpaceTest = uibutton(app.SpacePanel, 'push');
             app.SpaceTest.FontName = 'SimHei';
             app.SpaceTest.FontSize = 15;
-            app.SpaceTest.Position = [48 63 100 26];
+            app.SpaceTest.Position = [48 52 100 26];
             app.SpaceTest.Text = '正式测试';
+
+            % Create SpaceLabel
+            app.SpaceLabel = uilabel(app.SpacePanel);
+            app.SpaceLabel.HorizontalAlignment = 'center';
+            app.SpaceLabel.FontName = 'SimHei';
+            app.SpaceLabel.FontSize = 15;
+            app.SpaceLabel.Position = [80 171 35 22];
+            app.SpaceLabel.Text = '空间';
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
