@@ -62,7 +62,12 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             user.Name = app.UserName.Value;
             user.Sex = app.UserSex.Value;
             user.Dob = app.UserDob.Value;
-            app.CallingApp.updateUser(user);
+            switch app.UsingMethod
+                case "Creation"
+                    app.CallingApp.createUser(user);
+                case "Modification"
+                    app.CallingApp.updateUser(user);
+            end
             % let main app be ready for work
             app.CallingApp.getReady();
         end

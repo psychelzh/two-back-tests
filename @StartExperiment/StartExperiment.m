@@ -29,6 +29,7 @@ classdef StartExperiment < matlab.apps.AppBase
     
     properties (Access = private)
         DialogEditUser % User information editing
+        UserCreateTime % Store the time when user is created
     end
     
     methods (Access = private)
@@ -73,6 +74,13 @@ classdef StartExperiment < matlab.apps.AppBase
             app.SpacePanel.Enable = "on";
             app.SpacePrac.Enable = "on";
             app.SpaceTest.Enable = "off";
+        end
+        
+        function createUser(app, user)
+            % set the user creation time
+            app.UserCreateTime = datetime("now");
+            % update user info
+            app.updateUser(user);
         end
     end
     
