@@ -41,7 +41,7 @@ classdef StartExperiment < matlab.apps.AppBase
     end
     
     properties (Access = private, Constant)
-        AssetsFolder = "assets" % store data used in app building
+        AssetsFolder = ".assets" % store data used in app building
         UsersHistoryFile = "users_history.txt" % store users history
     end
     
