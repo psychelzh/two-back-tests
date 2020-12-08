@@ -147,8 +147,15 @@ try % error proof programming
         end
         % display instruction when separately practicing
         if args.ExperimentPart == "prac"
-            [instruction_img, ~, instruction_alpha] = ...
-                imread(fullfile('image', 'two-back.png'));
+            switch args.TaskType
+                case "digit"
+                    image_file = fullfile('image', 'two-back-number.PNG');
+                case "word"
+                    image_file = fullfile('image', 'two-back-verbal.PNG');
+                case "space"
+                    image_file = fullfile('image', 'two-back-space.PNG');
+            end
+            [instruction_img, ~, instruction_alpha] = imread(image_file);
             instruction_img(:, :, 4) = instruction_alpha;
             instruction_tex = Screen('MakeTexture', window_ptr, instruction_img);
             Screen('DrawTexture', window_ptr, instruction_tex);
