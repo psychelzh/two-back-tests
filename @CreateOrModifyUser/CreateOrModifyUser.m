@@ -66,12 +66,10 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             switch app.CallingMethod
                 case "Creation"
                     app.CallingApp.createUser(user);
-                    app.CallingApp.UserEvents = ...
-                        horzcat(app.CallingApp.UserEvents, "Created");
+                    app.CallingApp.appendEvent("Created");
                 case "Modification"
                     app.CallingApp.updateUser(user);
-                    app.CallingApp.UserEvents = ...
-                        union(app.CallingApp.UserEvents, "Modified");
+                    app.CallingApp.appendEvent("Modified");
             end
             app.CallingApp.outputUsersHistory();
             % let main app be ready for work

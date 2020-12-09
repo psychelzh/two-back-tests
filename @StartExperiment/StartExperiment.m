@@ -84,7 +84,10 @@ classdef StartExperiment < matlab.apps.AppBase
             writetable(vertcat(app.UsersHistory, app.UserCurrent), ...
                 fullfile(app.AssetsFolder, app.UsersHistoryFile))
         end
-        
+        % append events to user events structure
+        function appendEvent(app, event)
+            app.UserEvents = horzcat(app.UserEvents, event);
+        end
         function getReady(app)
             % enable user modification and creation
             app.Create.Enable = "on";
