@@ -78,7 +78,7 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserName.Text = user.Name;
             app.UserSex.Text = user.Sex;
             app.UserDob.Text = datestr(user.Dob, 'yyyy-mm-dd');
-            app.UserCurrent(:, fieldnames(user)) = struct2table(user);
+            app.UserCurrent = struct2table(user);
         end
         function createUser(app, user)
             % set the user creation time
@@ -135,7 +135,6 @@ classdef StartExperiment < matlab.apps.AppBase
             else
                 app.UsersHistory = table;
             end
-            app.UserCurrent = table;
             % initialize all the controllers
             app.initialize()
             % add user code directory
