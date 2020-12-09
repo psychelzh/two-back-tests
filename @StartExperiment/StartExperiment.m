@@ -111,8 +111,8 @@ classdef StartExperiment < matlab.apps.AppBase
 
         % Code that executes after component creation
         function startupFcn(app)
-            % make sure data folder is existing
-            if ~exist(app.AssetsFolder, "dir")
+            % make sure app data folder is existing
+            if ~isfolder(app.AssetsFolder)
                 mkdir(app.AssetsFolder)
             end
             history_file = fullfile(app.AssetsFolder, app.UsersHistoryFile);
