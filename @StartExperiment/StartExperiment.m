@@ -29,7 +29,6 @@ classdef StartExperiment < matlab.apps.AppBase
         SpaceLabel            matlab.ui.control.Label
     end
 
-    
     properties (Access = private)
         DialogEditUser % User information editing
         UserCreateTime % Store the time when user is created
@@ -48,8 +47,8 @@ classdef StartExperiment < matlab.apps.AppBase
     
     methods (Access = private)
         
+        % turn off all operation but creation
         function initialize(app)
-            % set status for all the controllers
             app.UserId.Text = "未注册";
             app.UserName.Text = "未注册";
             app.UserSex.Text = "未注册";
@@ -60,10 +59,12 @@ classdef StartExperiment < matlab.apps.AppBase
             app.WordPanel.Enable = "off";
             app.SpacePanel.Enable = "off";
         end
+        
     end
     
     methods (Access = public)
         
+        % user creation and updating
         function updateUser(app, user)
             % update current user info
             app.UserId.Text = num2str(user.Id);
@@ -72,14 +73,13 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserDob.Text = datestr(user.Dob, 'yyyy-mm-dd');
             app.UserCurrent(:, fieldnames(user)) = struct2table(user);
         end
-        
         function createUser(app, user)
             % set the user creation time
             app.UserCreateTime = datetime("now");
             % update user info
             app.updateUser(user);
         end
-        
+        % output for app use in future 
         function outputUsersHistory(app)
             writetable(vertcat(app.UsersHistory, app.UserCurrent), ...
                 fullfile(app.AssetsFolder, app.UsersHistoryFile))
@@ -88,6 +88,7 @@ classdef StartExperiment < matlab.apps.AppBase
         function appendEvent(app, event)
             app.UserEvents = horzcat(app.UserEvents, event);
         end
+        % set the app ready for experiment
         function getReady(app)
             % enable user modification and creation
             app.Create.Enable = "on";
@@ -107,7 +108,6 @@ classdef StartExperiment < matlab.apps.AppBase
         end
         
     end
-    
 
     % Callbacks that handle component events
     methods (Access = private)
