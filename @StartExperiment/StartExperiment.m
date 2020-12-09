@@ -19,14 +19,17 @@ classdef StartExperiment < matlab.apps.AppBase
         DigitPrac             matlab.ui.control.Button
         DigitTest             matlab.ui.control.Button
         DigitLabel            matlab.ui.control.Label
+        DigitPracPC           matlab.ui.control.Label
         WordPanel             matlab.ui.container.Panel
         WordPrac              matlab.ui.control.Button
         WordTest              matlab.ui.control.Button
         WordLabel             matlab.ui.control.Label
+        WordPracPC            matlab.ui.control.Label
         SpacePanel            matlab.ui.container.Panel
         SpacePrac             matlab.ui.control.Button
         SpaceTest             matlab.ui.control.Button
         SpaceLabel            matlab.ui.control.Label
+        SpacePracPC           matlab.ui.control.Label
     end
 
     properties (Access = private)
@@ -57,8 +60,11 @@ classdef StartExperiment < matlab.apps.AppBase
             app.Create.Enable = "on";
             app.Modify.Enable = "off";
             app.DigitPanel.Enable = "off";
+            app.DigitPracPC.Visible = "off";
             app.WordPanel.Enable = "off";
+            app.WordPracPC.Visible = "off";
             app.SpacePanel.Enable = "off";
+            app.SpacePracPC.Visible = "off";
         end
         
     end
@@ -301,6 +307,13 @@ classdef StartExperiment < matlab.apps.AppBase
             app.DigitLabel.Position = [79 171 35 22];
             app.DigitLabel.Text = '数字';
 
+            % Create DigitPracPC
+            app.DigitPracPC = uilabel(app.DigitPanel);
+            app.DigitPracPC.HorizontalAlignment = 'center';
+            app.DigitPracPC.FontName = 'SimHei';
+            app.DigitPracPC.Position = [48 93 100 22];
+            app.DigitPracPC.Text = '';
+
             % Create WordPanel
             app.WordPanel = uipanel(app.UIFigure);
             app.WordPanel.Position = [304 40 196 208];
@@ -327,6 +340,13 @@ classdef StartExperiment < matlab.apps.AppBase
             app.WordLabel.Position = [81 171 35 22];
             app.WordLabel.Text = '文字';
 
+            % Create WordPracPC
+            app.WordPracPC = uilabel(app.WordPanel);
+            app.WordPracPC.HorizontalAlignment = 'center';
+            app.WordPracPC.FontName = 'SimHei';
+            app.WordPracPC.Position = [47 93 100 22];
+            app.WordPracPC.Text = '';
+
             % Create SpacePanel
             app.SpacePanel = uipanel(app.UIFigure);
             app.SpacePanel.Position = [530 40 196 208];
@@ -352,6 +372,13 @@ classdef StartExperiment < matlab.apps.AppBase
             app.SpaceLabel.FontSize = 15;
             app.SpaceLabel.Position = [80 171 35 22];
             app.SpaceLabel.Text = '空间';
+
+            % Create SpacePracPC
+            app.SpacePracPC = uilabel(app.SpacePanel);
+            app.SpacePracPC.HorizontalAlignment = 'center';
+            app.SpacePracPC.FontName = 'SimHei';
+            app.SpacePracPC.Position = [48 93 100 22];
+            app.SpacePracPC.Text = '';
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
