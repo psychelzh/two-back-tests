@@ -79,6 +79,7 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserSex.Text = user.Sex;
             app.UserDob.Text = datestr(user.Dob, 'yyyy-mm-dd');
             app.UserCurrent = struct2table(user);
+            app.UserCurrent.createTime = app.UserCreateTime;
         end
         function createUser(app, user)
             % set the user creation time
