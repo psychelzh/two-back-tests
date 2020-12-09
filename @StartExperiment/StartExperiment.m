@@ -37,7 +37,8 @@ classdef StartExperiment < matlab.apps.AppBase
     
     properties (Access = public)
         UsersHistory % users load from disk
-        UserCurrent % current user
+        UserCurrent % store the info of current user
+        UserEvents % store all the operations of current user
     end
     
     properties (Access = private, Constant)
@@ -77,9 +78,6 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserCreateTime = datetime("now");
             % update user info
             app.updateUser(user);
-            % store user progress
-            app.UserCurrent = addvars(app.UserCurrent, ...
-                "created", 'NewVariableNames', 'progress');
         end
         
         function outputUsersHistory(app)
