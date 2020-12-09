@@ -44,6 +44,7 @@ classdef StartExperiment < matlab.apps.AppBase
     end
     
     properties (Access = private, Constant)
+        ExperimentName = "TwoBack" % used when storing data
         DataFolder = "data" % store user data
         AssetsFolder = ".assets" % store data used in app building
         UsersHistoryFile = "users_history.txt" % store users history
@@ -65,6 +66,71 @@ classdef StartExperiment < matlab.apps.AppBase
             app.WordPracPC.Visible = "off";
             app.SpacePanel.Enable = "off";
             app.SpacePracPC.Visible = "off";
+        end
+        % functions used when running an experiment
+        % a practice workflow
+        function practiceWorkflow(app, tasktype)
+            tasktype_upper = app.capitalize_first(tasktype);
+            [rec, status] = app.startExp(tasktype, "prac");
+            app.colorStatus(tasktype, "prac", status);
+            app.dispPC(tasktype, rec, status);
+            app.saveExpData(tasktype, "prac", rec, status)
+            app.appendEvent(tasktype_upper + "Prac");
+            app.(tasktype_upper + "Test").Enable = "on";
+        end
+        % a test workflow
+        function testWorkflow(app, tasktype)
+            tasktype_upper = app.capitalize_first(tasktype);
+            [rec, status] = app.startExp(tasktype, "test");
+            app.colorStatus(tasktype, "test", status);
+            app.saveExpData(tasktype, "test", rec, status)
+            app.appendEvent(tasktype_upper + "Test");
+            if status == 0
+                app.(tasktype_upper + "Test").Enable = "on";
+            end
+        end
+        % main stimuli presentation (this should be "Static", but no way?)
+        function [rec, status] = startExp(~, tasktype, taskpart)
+            % run this function from "src" folder
+            [rec, status] = start_two_back(...
+                "TaskType", tasktype, ...
+                "ExperimentPart", taskpart);
+        end
+        % color buttons to signal completion status
+        function colorStatus(app, tasktype, taskpart, status)
+            calling = app.capitalize_first(tasktype) + ...
+                app.capitalize_first(taskpart);
+            if status == 0
+                app.(calling).BackgroundColor = "green";
+            else
+                app.(Calling).BackgroundColor = "red";
+            end
+        end
+        % display percent of correct for practice part
+        function dispPC(app, tasktype, rec, status)
+            label_update = app.capitalize_first(tasktype) + "PracPC";
+            if status == 0
+                app.(label_update).Visible = "on";
+                app.(label_update).Text = sprintf('正确率：%.0f%%', ...
+                    sum(rec.acc == 1) / sum(~isnan(rec.acc)) * 100);
+            end
+        end
+        % save the recorded responses (VERY IMPORTANT)
+        function saveExpData(app, tasktype, taskpart, rec, status)
+            data_file = sprintf('%s-Sub_%d-Task_%s-Part_%s', ...
+                app.ExperimentName, app.UserCurrent.Id, ...
+                tasktype, taskpart);
+            if status ~= 0
+                [~, temp_suffix] = fileparts(tempname);
+                data_file = sprintf('Tmp_%s_%s', data_file, temp_suffix);
+            end
+            writetable(rec, fullfile(app.DataFolder, data_file), "Delimiter", "\t")
+        end
+        
+        % helper functions (these should be Static, but no way?)
+        function str_out = capitalize_first(~, str_in)
+            str_out = upper(extractBefore(str_in, 2)) + ...
+                extractAfter(str_in, 1);
         end
         
     end
@@ -91,6 +157,13 @@ classdef StartExperiment < matlab.apps.AppBase
         function outputUsersHistory(app)
             writetable(vertcat(app.UsersHistory, app.UserCurrent), ...
                 fullfile(app.AssetsFolder, app.UsersHistoryFile))
+        end
+        % output for experimenter use
+        function saveUserHistory(app)
+            writetable(vertcat(app.UsersHistory, app.UserCurrent), ...
+                fullfile(app.DataFolder, "users"), ...
+                "FileType", "text", ...
+                "Delimiter", "\t")
         end
         % append events to user events structure
         function appendEvent(app, event)
@@ -177,6 +250,36 @@ classdef StartExperiment < matlab.apps.AppBase
             waitfor(app.DialogEditUser.UIFigure)
             app.Create.Enable = "on";
             app.Modify.Enable = "on";
+        end
+
+        % Button pushed function: DigitPrac
+        function DigitPracButtonPushed(app, event)
+            app.practiceWorkflow("digit")
+        end
+
+        % Button pushed function: DigitTest
+        function DigitTestButtonPushed(app, event)
+            app.testWorkflow("digit")
+        end
+
+        % Button pushed function: WordPrac
+        function WordPracButtonPushed(app, event)
+            app.practiceWorkflow("word")
+        end
+
+        % Button pushed function: WordTest
+        function WordTestButtonPushed(app, event)
+            app.testWorkflow("word")
+        end
+
+        % Button pushed function: SpacePrac
+        function SpacePracButtonPushed(app, event)
+            app.practiceWorkflow("space")
+        end
+
+        % Button pushed function: SpaceTest
+        function SpaceTestButtonPushed(app, event)
+            app.testWorkflow("space")
         end
     end
 
@@ -287,6 +390,7 @@ classdef StartExperiment < matlab.apps.AppBase
 
             % Create DigitPrac
             app.DigitPrac = uibutton(app.DigitPanel, 'push');
+            app.DigitPrac.ButtonPushedFcn = createCallbackFcn(app, @DigitPracButtonPushed, true);
             app.DigitPrac.FontName = 'SimHei';
             app.DigitPrac.FontSize = 15;
             app.DigitPrac.Position = [47 124 100 26];
@@ -294,6 +398,7 @@ classdef StartExperiment < matlab.apps.AppBase
 
             % Create DigitTest
             app.DigitTest = uibutton(app.DigitPanel, 'push');
+            app.DigitTest.ButtonPushedFcn = createCallbackFcn(app, @DigitTestButtonPushed, true);
             app.DigitTest.FontName = 'SimHei';
             app.DigitTest.FontSize = 15;
             app.DigitTest.Position = [47 52 100 26];
@@ -320,6 +425,7 @@ classdef StartExperiment < matlab.apps.AppBase
 
             % Create WordPrac
             app.WordPrac = uibutton(app.WordPanel, 'push');
+            app.WordPrac.ButtonPushedFcn = createCallbackFcn(app, @WordPracButtonPushed, true);
             app.WordPrac.FontName = 'SimHei';
             app.WordPrac.FontSize = 15;
             app.WordPrac.Position = [48 124 100 26];
@@ -327,6 +433,7 @@ classdef StartExperiment < matlab.apps.AppBase
 
             % Create WordTest
             app.WordTest = uibutton(app.WordPanel, 'push');
+            app.WordTest.ButtonPushedFcn = createCallbackFcn(app, @WordTestButtonPushed, true);
             app.WordTest.FontName = 'SimHei';
             app.WordTest.FontSize = 15;
             app.WordTest.Position = [49 52 100 26];
@@ -353,6 +460,7 @@ classdef StartExperiment < matlab.apps.AppBase
 
             % Create SpacePrac
             app.SpacePrac = uibutton(app.SpacePanel, 'push');
+            app.SpacePrac.ButtonPushedFcn = createCallbackFcn(app, @SpacePracButtonPushed, true);
             app.SpacePrac.FontName = 'SimHei';
             app.SpacePrac.FontSize = 15;
             app.SpacePrac.Position = [48 124 100 26];
@@ -360,6 +468,7 @@ classdef StartExperiment < matlab.apps.AppBase
 
             % Create SpaceTest
             app.SpaceTest = uibutton(app.SpacePanel, 'push');
+            app.SpaceTest.ButtonPushedFcn = createCallbackFcn(app, @SpaceTestButtonPushed, true);
             app.SpaceTest.FontName = 'SimHei';
             app.SpaceTest.FontSize = 15;
             app.SpaceTest.Position = [48 52 100 26];
