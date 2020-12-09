@@ -41,6 +41,7 @@ classdef StartExperiment < matlab.apps.AppBase
     end
     
     properties (Access = private, Constant)
+        DataFolder = "data" % store user data
         AssetsFolder = ".assets" % store data used in app building
         UsersHistoryFile = "users_history.txt" % store users history
     end
@@ -117,6 +118,10 @@ classdef StartExperiment < matlab.apps.AppBase
             % make sure app data folder is existing
             if ~isfolder(app.AssetsFolder)
                 mkdir(app.AssetsFolder)
+            end
+            % make sure user data folder is existing
+            if ~isfolder(app.DataFolder)
+                mkdir(app.DataFolder)
             end
             history_file = fullfile(app.AssetsFolder, app.UsersHistoryFile);
             if exist(history_file, "file")
