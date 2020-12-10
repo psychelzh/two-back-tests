@@ -30,7 +30,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             % input values validation
             if app.UserId.Value == 0
                 selection = uiconfirm(app.UIFigure, ...
-                    "编号0为测试，数据不会被记录，是否继续？", "确认测试", ...
+                    "编号0为内部测试用户，用户不会被记录，且只记录最近一次作答数据，是否继续？", "编号确认", ...
                     "Options", ["确认", "取消"], ...
                     "DefaultOption", "取消", ...
                     "Icon", "warning");
@@ -74,8 +74,11 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
                     app.CallingApp.updateUser(user);
                     app.CallingApp.appendEvent("Modified");
             end
-            app.CallingApp.outputUsersHistory();
-            app.CallingApp.saveUserHistory();
+            % do not store user of id 0 (for internal use)
+            if user.Id ~= 0
+                app.CallingApp.outputUsersHistory();
+                app.CallingApp.saveUserHistory();
+            end
         end
     end
     
