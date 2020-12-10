@@ -222,7 +222,7 @@ classdef StartExperiment < matlab.apps.AppBase
         % Close request function: UIFigure
         function UIFigureCloseRequest(app, event)
             % check if user has completed if there's already one user
-            if ~isempty(app.UserEvents)
+            if ~isempty(app.UserEvents) && app.UserCurrent.Id ~= 0 % user id 0 is of internal use
                 is_completed = app.checkCompletion();
                 if ~is_completed
                     selection = uiconfirm(app.UIFigure, ...
@@ -242,7 +242,7 @@ classdef StartExperiment < matlab.apps.AppBase
         % Button pushed function: Create
         function CreateButtonPushed(app, event)
             % check if user has completed if there's already one user
-            if ~isempty(app.UserEvents)
+            if ~isempty(app.UserEvents) && app.UserCurrent.Id ~= 0 % user id 0 is of internal use
                 is_completed = app.checkCompletion();
                 if ~is_completed
                     selection = uiconfirm(app.UIFigure, ...
