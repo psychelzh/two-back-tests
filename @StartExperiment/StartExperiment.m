@@ -111,8 +111,14 @@ classdef StartExperiment < matlab.apps.AppBase
             label_update = app.capitalize_first(tasktype) + "PracPC";
             if status == 0
                 app.(label_update).Visible = "on";
-                app.(label_update).Text = sprintf('正确率：%.0f%%', ...
-                    sum(rec.acc == 1) / sum(~isnan(rec.acc)) * 100);
+                pc = sum(rec.acc == 1) / sum(~isnan(rec.acc)) * 100;
+                if ~isnan(pc)
+                    app.(label_update).FontColor = "black";
+                    app.(label_update).Text = sprintf('正确率：%.0f%%', pc);
+                else
+                    app.(label_update).FontColor = "red";
+                    app.(label_update).Text = "请重新练习";
+                end
             end
         end
         % save the recorded responses (VERY IMPORTANT)
