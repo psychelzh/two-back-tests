@@ -126,7 +126,11 @@ classdef StartExperiment < matlab.apps.AppBase
             end
             writetable(rec, fullfile(app.DataFolder, data_file), "Delimiter", "\t")
         end
-        
+        % check completion
+        function is_completed = checkCompletion(app)
+            check_events = ["DigitTest", "WordTest", "SpaceTest"];
+            is_completed = all(ismember(check_events, app.UserEvents));
+        end
         % helper functions (these should be Static, but no way?)
         function str_out = capitalize_first(~, str_in)
             str_out = upper(extractBefore(str_in, 2)) + ...
@@ -153,7 +157,7 @@ classdef StartExperiment < matlab.apps.AppBase
             % update user info
             app.updateUser(user);
         end
-        % output for app use in future 
+        % output for app use in future
         function outputUsersHistory(app)
             writetable(vertcat(app.UsersHistory, app.UserCurrent), ...
                 fullfile(app.AssetsFolder, app.UsersHistoryFile))
@@ -217,6 +221,19 @@ classdef StartExperiment < matlab.apps.AppBase
 
         % Close request function: UIFigure
         function UIFigureCloseRequest(app, event)
+            % check if user has completed if there's already one user
+            if ~isempty(app.UserEvents)
+                is_completed = app.checkCompletion();
+                if ~is_completed
+                    selection = uiconfirm(app.UIFigure, ...
+                        "当前用户还未完成所有测试，现在退出将导致当前用户不能继续测试，是否确认退出", "退出确认", ...
+                        "Options", ["是", "否"], ...
+                        "DefaultOption", "否");
+                    if selection == "否"
+                        return
+                    end
+                end
+            end
             delete(app)
             % remove user code directory
             rmpath("src")
@@ -224,8 +241,23 @@ classdef StartExperiment < matlab.apps.AppBase
 
         % Button pushed function: Create
         function CreateButtonPushed(app, event)
+            % check if user has completed if there's already one user
+            if ~isempty(app.UserEvents)
+                is_completed = app.checkCompletion();
+                if ~is_completed
+                    selection = uiconfirm(app.UIFigure, ...
+                        "当前用户还未完成所有测试，新建用户将导致当前用户不能继续测试，是否继续新建", "新建确认", ...
+                        "Options", ["是", "否"], ...
+                        "DefaultOption", "否");
+                    if selection == "否"
+                        return
+                    end
+                end
+            end
             % Create new user will trigger app initializing
             app.initialize();
+            % clear user events
+            app.UserEvents = [];
             % Disable creation while creating
             app.Create.Enable = "off";
             % Call app without user information
