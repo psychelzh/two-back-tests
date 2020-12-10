@@ -57,23 +57,25 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             end
         end
         
-        function setupMainApp(app)
-            % update user info in main app
+        function pushUser(app)
+            % collect user info into a struct
             user.Id = app.UserId.Value;
             user.Name = app.UserName.Value;
             user.Sex = app.UserSex.Value;
             user.Dob = app.UserDob.Value;
             switch app.CallingMethod
+                % update user info in main app
                 case "Creation"
                     app.CallingApp.createUser(user);
                     app.CallingApp.appendEvent("Created");
+                    % let main app be ready for work
+                    app.CallingApp.getReady();
                 case "Modification"
                     app.CallingApp.updateUser(user);
                     app.CallingApp.appendEvent("Modified");
             end
             app.CallingApp.outputUsersHistory();
-            % let main app be ready for work
-            app.CallingApp.getReady();
+            app.CallingApp.saveUserHistory();
         end
     end
     
@@ -116,9 +118,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
                     % update user info in main app
                     ok = app.validateInfo();
                     if ~ok, return; end
-                    if app.CallingMethod == "Creation"
-                        app.setupMainApp();
-                    end
+                    app.pushUser();
                 end
             end
             delete(app)
@@ -130,7 +130,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
                 % ensure values are valid and set up main app before exiting
                 ok = app.validateInfo();
                 if ~ok, return; end
-                app.setupMainApp();
+                app.pushUser();
             end
             delete(app)
         end
