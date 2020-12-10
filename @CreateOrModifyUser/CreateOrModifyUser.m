@@ -30,7 +30,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             % input values validation
             if app.UserId.Value == 0
                 selection = uiconfirm(app.UIFigure, ...
-                    "编号0为测试，数据不会被记录，是否继续？", "确认测试", ...
+                    "编号0为内部测试用户，用户不会被记录，且只记录最近一次作答数据，是否继续？", "编号确认", ...
                     "Options", ["确认", "取消"], ...
                     "DefaultOption", "取消", ...
                     "Icon", "warning");
@@ -57,21 +57,28 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             end
         end
         
-        function setupMainApp(app)
-            % update user info in main app
+        function pushUser(app)
+            % collect user info into a struct
             user.Id = app.UserId.Value;
             user.Name = app.UserName.Value;
             user.Sex = app.UserSex.Value;
             user.Dob = app.UserDob.Value;
             switch app.CallingMethod
+                % update user info in main app
                 case "Creation"
                     app.CallingApp.createUser(user);
+                    app.CallingApp.appendEvent("Created");
+                    % let main app be ready for work
+                    app.CallingApp.getReady();
                 case "Modification"
                     app.CallingApp.updateUser(user);
+                    app.CallingApp.appendEvent("Modified");
             end
-            app.CallingApp.outputUsersHistory();
-            % let main app be ready for work
-            app.CallingApp.getReady();
+            % do not store user of id 0 (for internal use)
+            if user.Id ~= 0
+                app.CallingApp.outputUsersHistory();
+                app.CallingApp.saveUserHistory();
+            end
         end
     end
     
@@ -114,9 +121,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
                     % update user info in main app
                     ok = app.validateInfo();
                     if ~ok, return; end
-                    if app.CallingMethod == "Creation"
-                        app.setupMainApp();
-                    end
+                    app.pushUser();
                 end
             end
             delete(app)
@@ -128,7 +133,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
                 % ensure values are valid and set up main app before exiting
                 ok = app.validateInfo();
                 if ~ok, return; end
-                app.setupMainApp();
+                app.pushUser();
             end
             delete(app)
         end
