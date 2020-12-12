@@ -20,7 +20,7 @@ exception = [];
 % fixation duration
 time_fixation_secs = 0.5;
 % stimuli duration
-time_stimuli_secs = 1;
+time_stimuli_secs = 2;
 % a blank screen still wait for user's response
 time_blank_secs = 1;
 % used in "prac" part, feedback duration
