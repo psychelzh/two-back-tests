@@ -16,12 +16,17 @@ end
 status = 0;
 exception = [];
 
-% ---- set experiment timing parameters (predefined here) ----
+% ---- set experiment timing parameters (predefined here, all in secs) ----
+% fixation duration
 time_fixation_secs = 0.5;
+% stimuli duration
 time_stimuli_secs = 1;
+% a blank screen still wait for user's response
 time_blank_secs = 1;
-time_wait_start_secs = 4;
+% used in "prac" part, feedback duration
 time_feedback_secs = 0.5;
+% used in "test" part, interval for user's preparation for test
+time_wait_start_secs = 4;
 time_wait_end_secs = 4;
 
 % ---- prepare sequences ----
