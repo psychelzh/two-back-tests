@@ -57,6 +57,15 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             end
         end
         
+        function loadUser(app, user_id)
+            % get user history by main app
+            user = app.CallingApp.retrieveUser(user_id, "Pull", true);
+            app.UserId.Value = user.Id;
+            app.UserName.Value = user.Name;
+            app.UserSex.Value = user.Sex;
+            app.UserDob.Value = user.Dob;
+        end
+        
         function pushUser(app)
             % collect user info into a struct
             user.Id = app.UserId.Value;
@@ -76,8 +85,9 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             end
             % do not store user of id 0 (for internal use)
             if user.Id ~= 0
+                app.CallingApp.saveUsersHistory();
+                app.CallingApp.saveEventsHistory();
                 app.CallingApp.outputUsersHistory();
-                app.CallingApp.saveUserHistory();
             end
         end
     end
@@ -141,21 +151,16 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
         % Value changed function: UserId
         function UserIdValueChanged(app, event)
             app.IsChanged = true;
-            if ~isempty(app.CallingApp.UsersHistory)
-                is_used = ismember(event.Value, app.CallingApp.UsersHistory.Id);
-            else
-                is_used = false;
-            end
-            if is_used
+            if app.CallingApp.retrieveUser(event.Value)
                 switch app.CallingMethod
                     case "Creation"
                         selection = uiconfirm(app.UIFigure, ...
                             "当前编号已经使用过，请选择操作：", "编号重复", ...
-                            "Options", ["删除旧被试并继续", "返回重新输入"], ...
+                            "Options", ["载入旧被试并继续", "返回重新输入"], ...
                             "DefaultOption", "返回重新输入");
                         switch selection
-                            case "删除旧被试并继续"
-                                app.CallingApp.UsersHistory(is_used, :) = [];
+                            case "载入旧被试并继续"
+                                app.loadUser(event.Value);
                             case "返回重新输入"
                                 app.UserId.Value = 0;
                         end
