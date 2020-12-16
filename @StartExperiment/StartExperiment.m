@@ -59,16 +59,17 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserDob.Text = "未注册";
             app.Create.Enable = "on";
             app.Modify.Enable = "off";
-            app.DigitPanel.Enable = "off";
-            app.DigitPracPC.Visible = "off";
-            app.WordPanel.Enable = "off";
-            app.WordPracPC.Visible = "off";
-            app.SpacePanel.Enable = "off";
-            app.SpacePracPC.Visible = "off";
+            arrayfun(@initPanel, ["Digit", "Word", "Space"])
             % clear current user info
             app.User = table;
             % clear current user events
             app.Events = table;
+            function initPanel(tasktype)
+                app.(tasktype + "Panel").Enable = "off";
+                app.(tasktype + "Prac").BackgroundColor = [0.96, 0.96, 0.96];
+                app.(tasktype + "PracPC").Visible = "off";
+                app.(tasktype + "Test").BackgroundColor = [0.96, 0.96, 0.96];
+            end
         end
         % functions used when running an experiment
         % a practice workflow
