@@ -16,13 +16,23 @@ end
 status = 0;
 exception = [];
 
-% ---- set experiment timing parameters (predefined here) ----
+% ---- set experiment timing parameters (predefined here, all in secs) ----
+% fixation duration
 time_fixation_secs = 0.5;
-time_stimuli_secs = 1;
+% stimuli duration
+time_stimuli_secs = 2;
+% a blank screen still wait for user's response
 time_blank_secs = 1;
-time_wait_start_secs = 4;
+% used in "prac" part, feedback duration
 time_feedback_secs = 0.5;
+% used in "test" part, interval for user's preparation for test
+time_wait_start_secs = 4;
 time_wait_end_secs = 4;
+% set common relative trial boundaries, three events occured here
+%  the first: fixation offset and stimuli onset
+%  the second: stimulus offset and blank screen displayed
+%  the third: trial end
+trial_bound_rel = cumsum([time_fixation_secs, time_stimuli_secs, time_blank_secs]);
 
 % ---- prepare sequences ----
 args_cell = namedargs2cell(args);
@@ -69,11 +79,6 @@ try % error proof programming
     % ---- timing information ----
     % get inter flip interval
     ifi = Screen('GetFlipInterval', window_ptr);
-    % stimulus time boundaries for each trial:
-    %  the first: stimulus onset
-    %  the second: stimulus offset
-    %  the third: trial end (or time length of one trial)
-    stim_bound = cumsum([time_fixation_secs, time_stimuli_secs, time_blank_secs]);
     
     % ---- keyboard settings ----
     keys.start = KbName('s');
@@ -181,16 +186,16 @@ try % error proof programming
             resp_made = false;
             time_expect_current = time_expect_next;
             % stimulus trial contains a fixation cross, a stimulus and a blank screen
-            time_expect_next = time_expect_next + stim_bound(3);
-            % set the timing boundray of three phases of a trial
-            trial_bound = time_expect_current + stim_bound;
+            time_expect_next = time_expect_next + trial_bound_rel(3);
+            % set the absolute timing boundray of three phases of a trial
+            trial_bound_abs = time_expect_current + trial_bound_rel;
             % draw fixation and wait for press of `Esc` to exit
             DrawFormattedText(window_ptr, '+', 'center', 'center', [0, 0, 0]);
             trial_start_timestamp = ...
                 Screen('Flip', window_ptr, ...
                 start_time + time_expect_current - 0.5 * ifi);
             [~, resp_code] = ...
-                KbPressWait(-1, start_time + trial_bound(1) - 0.5 * ifi);
+                KbPressWait(-1, start_time + trial_bound_abs(1) - 0.5 * ifi);
             if resp_code(keys.exit)
                 early_exit = true;
                 break
@@ -222,9 +227,9 @@ try % error proof programming
                     end
             end
             stim_onset_timestamp = Screen('Flip', window_ptr, ...
-                start_time + trial_bound(1) - 0.5 * ifi);
+                start_time + trial_bound_abs(1) - 0.5 * ifi);
             [resp_timestamp, resp_code] = ...
-                KbPressWait(-1, start_time + trial_bound(2) - 0.5 * ifi);
+                KbPressWait(-1, start_time + trial_bound_abs(2) - 0.5 * ifi);
             if resp_code(keys.exit)
                 early_exit = true;
                 break
@@ -235,10 +240,10 @@ try % error proof programming
             % blank screen to wait for user's reponse
             Screen('FillRect', window_ptr, gray);
             stim_offset_timestamp = Screen('Flip', window_ptr, ...
-                start_time + trial_bound(2) - 0.5 * ifi);
+                start_time + trial_bound_abs(2) - 0.5 * ifi);
             if ~resp_made
                 [resp_timestamp, resp_code] = ...
-                    KbPressWait(-1, start_time + trial_bound(3) - 0.5 * ifi);
+                    KbPressWait(-1, start_time + trial_bound_abs(3) - 0.5 * ifi);
                 if resp_code(keys.exit)
                     early_exit = true;
                     break
@@ -305,7 +310,7 @@ try % error proof programming
                 % no feedback if no response to "filler" stimuli
                 if ~(trial.type == "filler" && ~resp_made)
                     DrawFormattedText(window_ptr, double(feedback_msg), 'center', 'center', feedback_color);
-                    Screen('Flip', window_ptr, start_time + trial_bound(3) - 0.5 * ifi);
+                    Screen('Flip', window_ptr, start_time + trial_bound_abs(3) - 0.5 * ifi);
                     WaitSecs(time_feedback_secs);
                     time_expect_next = time_expect_next + time_feedback_secs;
                 end
