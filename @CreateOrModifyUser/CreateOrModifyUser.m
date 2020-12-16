@@ -59,7 +59,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
         
         function loadUser(app, user_id)
             % get user history by main app
-            user = app.CallingApp.retrieveUser(user_id, "Pull", true);
+            [~, user] = app.CallingApp.retrieveUser(user_id, "Pull", true);
             app.UserId.Value = user.Id;
             app.UserName.Value = user.Name;
             app.UserSex.Value = user.Sex;
