@@ -53,5 +53,5 @@ for group = 1:num_group
         'Before', 1, 'NewVariableNames', 'block');
     stimuli = vertcat(stimuli, stimuli_cur_group); %#ok<AGROW>
 end
-stimuli = addvars(stimuli, (1:height(stimuli))', 'Before', 1, 'NewVariableNames', 'item_id');
+stimuli = addvars(stimuli, (1:height(stimuli))', 'Before', 1, 'NewVariableNames', 'stim_id');
 writetable(stimuli, fullfile('config', 'stimuli.xlsx'), 'Sheet', 'space')
