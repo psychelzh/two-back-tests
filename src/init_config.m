@@ -71,4 +71,5 @@ while true
         break
     end
 end
+seq = table2struct(seq)';
 end
