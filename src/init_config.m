@@ -55,7 +55,7 @@ while true
     for i_trial = 1:num_trials
         seq.id(i_trial) = i_trial;
         if i_trial <= 2
-            seq.type(i_trial) = "Filler";
+            seq.type(i_trial) = "filler";
             seq.cresp(i_trial) = "None";
         else
             if seq.group(i_trial) == seq.group(i_trial - 2)
