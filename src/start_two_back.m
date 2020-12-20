@@ -83,32 +83,6 @@ try % error proof programming
     keys.left = KbName('LeftArrow');
     keys.right = KbName('RightArrow');
     
-    % ---- prepare squares for "space" tasktype -----
-    switch args.TaskType
-        case "digit"
-            digits = 0:9;
-        case "word"
-            words = {'我们', '白云', '老师', '太阳', '水牛', '石头', '大小', '金色', '书包', '尾巴'};
-        case "space"
-            n_squares = length(args.StimuliId);
-            [center_x, center_y] = RectCenter(window_rect);
-            display_rect = CenterRectOnPoint(floor(0.7 * window_rect), center_x, center_y);
-            square_size = floor(0.1 * RectHeight(window_rect));
-            while true
-                x_pos = randsample(RectWidth(display_rect), n_squares) + display_rect(1);
-                y_pos = randsample(RectHeight(display_rect), n_squares) + display_rect(2);
-                squares_pos = [x_pos, y_pos];
-                if all(pdist(squares_pos) > sqrt(2) * square_size)
-                    break
-                end
-            end
-            base_rect = [0, 0, square_size, square_size];
-            square_rects = nan(4, n_squares);
-            for i_square = 1:n_squares
-                square_rects(:, i_square) = CenterRectOnPoint(base_rect, squares_pos(i_square, 1), squares_pos(i_square, 2));
-            end
-    end
-    
     % ---- present stimuli ----
     % display welcome screen and wait for a press of 's' to start
     [welcome_img, ~, welcome_alpha] = ...
@@ -201,27 +175,39 @@ try % error proof programming
             switch args.TaskType
                 case "digit"
                     if trial.type == "filler"
-                        DrawFormattedText(window_ptr, num2str(digits(trial.stim_id)), ...
+                        DrawFormattedText(window_ptr, num2str(trial.stim), ...
                             'center', 'center', [1, 0, 0]);
                     else
-                        DrawFormattedText(window_ptr, num2str(digits(trial.stim_id)), ...
+                        DrawFormattedText(window_ptr, num2str(trial.stim), ...
                             'center', 'center', [0, 0, 0]);
                     end
                 case "word"
                     if trial.type == "filler"
-                        DrawFormattedText(window_ptr, words{trial.stim_id}, ...
+                        DrawFormattedText(window_ptr, trial.stim, ...
                             'center', 'center', [1, 0, 0]);
                     else
-                        DrawFormattedText(window_ptr, words{trial.stim_id}, ...
+                        DrawFormattedText(window_ptr, trial.stim, ...
                             'center', 'center', [0, 0, 0]);
                     end
                 case "space"
-                    Screen('FrameRect', window_ptr, [0, 0, 0], square_rects, 5);
+                    [center_x, center_y] = RectCenter(window_rect);
+                    % display an X-shaped cross
+                    line_width = floor(RectHeight(window_rect) * 0.01);
+                    cross_area_size = floor(RectHeight(window_rect) * 0.1);
+                    cross_x_coords = [-cross_area_size, cross_area_size, -cross_area_size, cross_area_size];
+                    cross_y_coords = [-cross_area_size, cross_area_size, cross_area_size, -cross_area_size];
+                    Screen('DrawLines', window_ptr, [cross_x_coords; cross_y_coords], ...
+                        line_width, [0, 0, 0], [center_x, center_y], 2)
+                    % draw dots
+                    display_area_size = floor(RectHeight(window_rect) * 0.75);
+                    dot_size = 20;
+                    dot_pos = round((str2double(strsplit(trial.stim, '-')) - 0.5) * display_area_size);
                     if trial.type == "filler"
-                        Screen('FillRect', window_ptr, [1, 0, 0], square_rects(:, trial.stim_id));
+                        dot_color = [1, 0, 0];
                     else
-                        Screen('FillRect', window_ptr, [0, 0, 0], square_rects(:, trial.stim_id));
+                        dot_color = [0, 0, 0];
                     end
+                    Screen('DrawDots', window_ptr, dot_pos, dot_size, dot_color, [center_x, center_y], 1);
             end
             stim_onset_timestamp = Screen('Flip', window_ptr, ...
                 start_time + trial_bound_abs(1) - 0.5 * ifi);
