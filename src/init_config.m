@@ -33,7 +33,7 @@ config.blocks = repelem(struct, num_blocks);
 for i_block = 1:num_blocks
     config.blocks(i_block).id = i_block;
     switch args.ExperimentPart
-        case "prc"
+        case "prac"
             stim_set = stim_config(stim_config.block == 0, :);
         case "test"
             stim_set = stim_config(stim_config.block == i_block, :);
