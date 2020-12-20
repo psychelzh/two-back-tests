@@ -14,63 +14,61 @@ arguments
     % see the description of these in "start_two_back()"
     args.TaskType {mustBeMember(args.TaskType, ["digit", "word", "space"])} = "digit"
     args.ExperimentPart {mustBeMember(args.ExperimentPart, ["prac", "test"])} = "prac"
-    args.StimuliId (1,:) {mustBeInteger} = 1:10
-    args.TrialsPerBlock (1,1) {mustBeInteger} = 10
 end
+% configure stimuli set
+stim_config = readtable(fullfile('config', 'stimuli.xlsx'), "Sheet", args.TaskType, "TextType", "string");
 % configure random seed and number of blocks
 switch args.ExperimentPart
     case "prac"
         % set different random seed for each user
         rng('Shuffle')
-        num_blocks = 2;
+        num_blocks = 1;
     case "test"
         % fix random seed for each type of task
         rng(sum(char(args.TaskType)))
-        num_blocks = 8;
+        num_blocks = 6;
 end
 % generate sequence for each block
 config.blocks = repelem(struct, num_blocks);
 for i_block = 1:num_blocks
     config.blocks(i_block).id = i_block;
+    switch args.ExperimentPart
+        case "prc"
+            stim_set = stim_config(stim_config.block == 0, :);
+        case "test"
+            stim_set = stim_config(stim_config.block == i_block, :);
+    end
     config.blocks(i_block).trials = ...
-        gen_block_seq(args.StimuliId, args.TrialsPerBlock);
+        gen_block_seq(stim_set);
 end
 rng('default')
 end
 
-function seq = gen_block_seq(stim_set, num_trials)
+function seq = gen_block_seq(stim_set)
 % GENBLOCKSEQ generates sequence for each block
 
-% generate trial type sequence
-types_stem = repelem(["target", "distractor"], num_trials / 2);
-% add two filler trials to the front
-types = [repelem("filler", 2), randsample(types_stem, length(types_stem))];
-% preallocate
-stims_id = nan(1, length(types));
-% generate sequence
-for itrial = 1:length(types)
-    if types(itrial) == "filler"
-        if itrial == 1
-            exclude = [];
+num_trials = height(stim_set);
+while true
+    seq = datasample(stim_set, num_trials, 'Replace', false);
+    seq.id = (1:num_trials)';
+    seq.type = strings(num_trials, 1);
+    for i_trial = 1:num_trials
+        seq.id(i_trial) = i_trial;
+        if i_trial <= 2
+            seq.type(i_trial) = "Filler";
+            seq.cresp(i_trial) = "None";
         else
-            exclude = stims_id(itrial - 1);
+            if seq.group(i_trial) == seq.group(i_trial - 2)
+                seq.type(i_trial) = "target";
+                seq.cresp(i_trial) = "Left";
+            else
+                seq.type(i_trial) = "distractor";
+                seq.cresp(i_trial) = "Right";
+            end
         end
-        stims_id(itrial) = randsample(stim_set, 1, true, ~ismember(stim_set, exclude));
     end
-    if types(itrial) == "target"
-        stims_id(itrial) = stims_id(itrial - 2);
-    end
-    if types(itrial) == "distractor"
-        stims_id(itrial) = randsample(stim_set, 1, true, ~ismember(stim_set, stims_id(itrial - 2:itrial - 1)));
+    if sum(seq.type == "target") == sum(seq.type == "distractor")
+        break
     end
 end
-% set the correct response sequence
-cresp = strings(1, length(types));
-cresp(types == "target") = "Left";
-cresp(types == "distractor") = "Right";
-seq = struct(...
-    'id', num2cell(1:length(types)), ...
-    'stim_id', num2cell(stims_id), ...
-    'type', num2cell(types), ...
-    'cresp', num2cell(cresp));
 end

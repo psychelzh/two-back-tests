@@ -5,11 +5,8 @@ function [recordings, status, exception] = start_two_back(args)
 arguments
     % three types of tasks are included
     args.TaskType {mustBeMember(args.TaskType, ["digit", "word", "space"])} = "digit"
-    % all the stimuli id used in experiment
-    args.StimuliId (1,:) {mustBeInteger} = 1:10
     % set experiment part, i.e., practice or testing
     args.ExperimentPart {mustBeMember(args.ExperimentPart, ["prac", "test"])} = "prac"
-    args.TrialsPerBlock (1,1) {mustBeInteger} = 10
 end
 
 % ---- set default error related outputs ----
