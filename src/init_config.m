@@ -16,7 +16,7 @@ arguments
     args.ExperimentPart {mustBeMember(args.ExperimentPart, ["prac", "test"])} = "prac"
 end
 % configure stimuli set
-stim_config = readtable(fullfile('config', 'stimuli.xlsx'), "Sheet", args.TaskType, "TextType", "string");
+stim_config = readtable(fullfile('config', join(args.TaskType, '.csv')), "TextType", "string");
 % configure random seed and number of blocks
 switch args.ExperimentPart
     case "prac"

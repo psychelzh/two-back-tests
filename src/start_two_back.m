@@ -72,17 +72,17 @@ try % error proof programming
     % set default font name and size
     Screen('TextFont', window_ptr, 'SimHei');
     Screen('TextSize', window_ptr, 128);
-    
+
     % ---- timing information ----
     % get inter flip interval
     ifi = Screen('GetFlipInterval', window_ptr);
-    
+
     % ---- keyboard settings ----
     keys.start = KbName('s');
     keys.exit = KbName('Escape');
     keys.left = KbName('LeftArrow');
     keys.right = KbName('RightArrow');
-    
+
     % ---- present stimuli ----
     % display welcome screen and wait for a press of 's' to start
     [welcome_img, ~, welcome_alpha] = ...
@@ -183,10 +183,10 @@ try % error proof programming
                     end
                 case "word"
                     if trial.type == "filler"
-                        DrawFormattedText(window_ptr, trial.stim, ...
+                        DrawFormattedText(window_ptr, char(trial.stim), ...
                             'center', 'center', [1, 0, 0]);
                     else
-                        DrawFormattedText(window_ptr, trial.stim, ...
+                        DrawFormattedText(window_ptr, char(trial.stim), ...
                             'center', 'center', [0, 0, 0]);
                     end
                 case "space"
@@ -199,7 +199,7 @@ try % error proof programming
                     Screen('DrawLines', window_ptr, [cross_x_coords; cross_y_coords], ...
                         line_width, [0, 0, 0], [center_x, center_y], 2)
                     % draw dots
-                    display_area_size = floor(RectHeight(window_rect) * 0.75);
+                    display_area_size = floor(RectHeight(window_rect) * 0.5);
                     dot_size = 20;
                     dot_pos = round((str2double(strsplit(trial.stim, '-')) - 0.5) * display_area_size);
                     if trial.type == "filler"
