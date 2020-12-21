@@ -5,7 +5,6 @@
 % Group 2: y > x & y > 1 - x
 % Group 3: y > x & y < 1 - x
 % Group 4: y < x & y < 1 - x
-% ensure they are not near the lines
 rng(20201220)
 num_stim_each_group = 21;
 num_blocks = 7;
@@ -16,8 +15,9 @@ for group = 1:num_group
     for i_stimuli = 1:num_stim_each_group
         while true
             coord_pos = rand(1, 2);
+            % ensure they are not near the arms of the cross
             check_diags = [coord_pos(2) - coord_pos(1), coord_pos(2) - (1 - coord_pos(1))];
-            if any(abs(check_diags) < 0.1)
+            if any(abs(check_diags) < 0.15)
                 continue
             end
             switch group
@@ -53,4 +53,4 @@ for group = 1:num_group
     stimuli = vertcat(stimuli, stimuli_cur_group); %#ok<AGROW>
 end
 stimuli = addvars(stimuli, (1:height(stimuli))', 'Before', 1, 'NewVariableNames', 'stim_id');
-writetable(stimuli, fullfile('config', 'stimuli.xlsx'), 'Sheet', 'space')
+writetable(stimuli, fullfile('config', 'space.csv'))
