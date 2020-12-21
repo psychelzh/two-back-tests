@@ -15,6 +15,7 @@ classdef StartExperiment < matlab.apps.AppBase
         Create                matlab.ui.control.Button
         UserIdLabel           matlab.ui.control.Label
         UserId                matlab.ui.control.Label
+        Load                  matlab.ui.control.Button
         DigitPanel            matlab.ui.container.Panel
         DigitPrac             matlab.ui.control.Button
         DigitTest             matlab.ui.control.Button
@@ -59,6 +60,11 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserDob.Text = "未注册";
             app.Create.Enable = "on";
             app.Modify.Enable = "off";
+            if isempty(app.UsersHistory)
+                app.Load.Enable = "off";
+            else
+                app.Load.Enable = "on";
+            end
             arrayfun(@initPanel, ["Digit", "Word", "Space"])
             % clear current user info
             app.User = table;
@@ -430,7 +436,7 @@ classdef StartExperiment < matlab.apps.AppBase
             app.Modify.ButtonPushedFcn = createCallbackFcn(app, @ModifyButtonPushed, true);
             app.Modify.FontName = 'SimHei';
             app.Modify.FontSize = 15;
-            app.Modify.Position = [33 50 88 26];
+            app.Modify.Position = [30 56 88 26];
             app.Modify.Text = '修改';
 
             % Create UserInfoLabel
@@ -445,7 +451,7 @@ classdef StartExperiment < matlab.apps.AppBase
             app.Create.ButtonPushedFcn = createCallbackFcn(app, @CreateButtonPushed, true);
             app.Create.FontName = 'SimHei';
             app.Create.FontSize = 15;
-            app.Create.Position = [144 50 88 26];
+            app.Create.Position = [141 56 88 26];
             app.Create.Text = '新建';
 
             % Create UserIdLabel
@@ -462,6 +468,14 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserId.FontSize = 15;
             app.UserId.Position = [103 201 101 22];
             app.UserId.Text = '未注册';
+
+            % Create Load
+            app.Load = uibutton(app.ParticipantInfoPanel, 'push');
+            app.Load.ButtonPushedFcn = createCallbackFcn(app, @LoadButtonPushed, true);
+            app.Load.FontName = 'SimHei';
+            app.Load.FontSize = 15;
+            app.Load.Position = [86 14 88 26];
+            app.Load.Text = '导入';
 
             % Create DigitPanel
             app.DigitPanel = uipanel(app.UIFigure);
