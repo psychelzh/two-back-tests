@@ -54,7 +54,20 @@ classdef StartExperiment < matlab.apps.AppBase
         
         % set app ready for a new user
         function initialize(app)
-            % turn off all operation but creation
+            % load all the history user info
+            users_history_file = fullfile(app.AssetsFolder, app.UsersHistoryFile);
+            if exist(users_history_file, "file")
+                app.UsersHistory = readtable(users_history_file, 'TextType', 'string');
+            else
+                app.UsersHistory = table;
+            end
+            % load all the history user events
+            events_history_file = fullfile(app.AssetsFolder, app.EventsHistoryFile);
+            if exist(events_history_file, "file")
+                app.EventsHistory = readtable(events_history_file, 'TextType', 'string');
+            else
+                app.EventsHistory = table;
+            end
             app.UserId.Text = "未注册";
             app.UserName.Text = "未注册";
             app.UserSex.Text = "未注册";
@@ -271,20 +284,6 @@ classdef StartExperiment < matlab.apps.AppBase
             % make sure user data folder is existing
             if ~isfolder(app.DataFolder)
                 mkdir(app.DataFolder)
-            end
-            % load all the history user info
-            users_history_file = fullfile(app.AssetsFolder, app.UsersHistoryFile);
-            if exist(users_history_file, "file")
-                app.UsersHistory = readtable(users_history_file, 'TextType', 'string');
-            else
-                app.UsersHistory = table;
-            end
-            % load all the history user events
-            events_history_file = fullfile(app.AssetsFolder, app.EventsHistoryFile);
-            if exist(events_history_file, "file")
-                app.EventsHistory = readtable(events_history_file, 'TextType', 'string');
-            else
-                app.EventsHistory = table;
             end
             % initialize all the controllers
             app.initialize()
