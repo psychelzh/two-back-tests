@@ -137,27 +137,10 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
         function UserIdValueChanged(app, event)
             app.IsChanged = true;
             if app.CallingApp.loadUser(event.Value, "Pull", false)
-                switch app.CallingMethod
-                    case "Creation"
-                        selection = uiconfirm(app.UIFigure, ...
-                            "当前编号已经使用过，请选择操作：", "编号重复", ...
-                            "Options", ["载入旧被试并继续", "返回重新输入"], ...
-                            "DefaultOption", "返回重新输入");
-                        switch selection
-                            case "载入旧被试并继续"
-                                app.CallingApp.loadUser(event.Value);
-                                app.CallingApp.appendEvent("Loaded");
-                                app.CallingApp.getReady();
-                                delete(app)
-                            case "返回重新输入"
-                                app.UserId.Value = 0;
-                        end
-                    case "Modification"
-                        uialert(app.UIFigure, ...
-                            "不允许修改为已有被试的编号", "编号重复", ...
-                            "Icon", "error")
-                        app.UserId.Value = app.CallingUserId;
-                end
+                uialert(app.UIFigure, ...
+                    "不允许使用已有被试的编号", "编号重复", ...
+                    "Icon", "error")
+                app.UserId.Value = app.CallingUserId;
             end
         end
 
