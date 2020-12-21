@@ -74,12 +74,6 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
                     app.CallingApp.updateUser(user);
                     app.CallingApp.appendEvent("Modified");
             end
-            % do not store user of id 0 (for internal use)
-            if user.Id ~= 0
-                app.CallingApp.saveUsersHistory();
-                app.CallingApp.saveEventsHistory();
-                app.CallingApp.outputUsersHistory();
-            end
         end
     end
     
