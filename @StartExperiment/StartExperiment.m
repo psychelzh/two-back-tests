@@ -327,12 +327,7 @@ classdef StartExperiment < matlab.apps.AppBase
             % Disable creation and modification while modifying
             app.Modify.Enable = "off";
             app.Create.Enable = "off";
-            % a quick collection of user information
-            user.Id = str2double(app.UserId.Text);
-            user.Name = app.UserName.Text;
-            user.Sex = app.UserSex.Text;
-            user.Dob = datetime(app.UserDob.Text);
-            app.DialogEditUser = CreateOrModifyUser(app, user);
+            app.DialogEditUser = CreateOrModifyUser(app, app.User);
             % Enable creation and modification after calling
             waitfor(app.DialogEditUser.UIFigure)
             app.Create.Enable = "on";
