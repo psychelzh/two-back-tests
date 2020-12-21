@@ -15,6 +15,10 @@ for group = 1:num_group
     for i_stimuli = 1:num_stim_each_group
         while true
             coord_pos = rand(1, 2);
+            % ensure they are not near the rims
+            if any(coord_pos < 0.15 | coord_pos > 0.85)
+                continue
+            end
             % ensure they are not near the arms of the cross
             check_diags = [coord_pos(2) - coord_pos(1), coord_pos(2) - (1 - coord_pos(1))];
             if any(abs(check_diags) < 0.15)
