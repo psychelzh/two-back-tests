@@ -68,17 +68,21 @@ classdef StartExperiment < matlab.apps.AppBase
             else
                 app.EventsHistory = table;
             end
+            % no user info
             app.UserId.Text = "未注册";
             app.UserName.Text = "未注册";
             app.UserSex.Text = "未注册";
             app.UserDob.Text = "未注册";
+            % enable creation but disable modification
             app.Create.Enable = "on";
             app.Modify.Enable = "off";
+            % enable loading if history is not empty
             if isempty(app.UsersHistory)
                 app.Load.Enable = "off";
             else
                 app.Load.Enable = "on";
             end
+            % disable all the experiment part because there is no user
             arrayfun(@initPanel, ["Digit", "Word", "Space"])
             % clear current user info
             app.User = table;
