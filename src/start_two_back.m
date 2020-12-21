@@ -199,7 +199,7 @@ try % error proof programming
                     Screen('DrawLines', window_ptr, [cross_x_coords; cross_y_coords], ...
                         line_width, [0, 0, 0], [center_x, center_y], 2)
                     % draw dots
-                    display_area_size = floor(RectHeight(window_rect) * 0.75);
+                    display_area_size = floor(RectHeight(window_rect) * 0.5);
                     dot_size = 20;
                     dot_pos = round((str2double(strsplit(trial.stim, '-')) - 0.5) * display_area_size);
                     if trial.type == "filler"
