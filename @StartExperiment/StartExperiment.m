@@ -15,6 +15,7 @@ classdef StartExperiment < matlab.apps.AppBase
         Create                matlab.ui.control.Button
         UserIdLabel           matlab.ui.control.Label
         UserId                matlab.ui.control.Label
+        Load                  matlab.ui.control.Button
         DigitPanel            matlab.ui.container.Panel
         DigitPrac             matlab.ui.control.Button
         DigitTest             matlab.ui.control.Button
@@ -33,14 +34,12 @@ classdef StartExperiment < matlab.apps.AppBase
     end
 
     properties (Access = private)
-        DialogEditUser % User information editing
-        UserCreateTime % Store the time when user is created
-    end
-    
-    properties (Access = public)
+        DialogEditUser % Child UI: user information editing
+        DialogLoadUser % Child UI: load old user
         UsersHistory % users load from disk
-        UserCurrent % store the info of current user
-        UserEvents % store all the operations of current user
+        EventsHistory % users' events load from disk
+        User % store the info of current user
+        Events % store all the operations of current user
     end
     
     properties (Access = private, Constant)
@@ -48,24 +47,53 @@ classdef StartExperiment < matlab.apps.AppBase
         DataFolder = "data" % store user data
         AssetsFolder = ".assets" % store data used in app building
         UsersHistoryFile = "users_history.txt" % store users history
+        EventsHistoryFile = "events_history.txt" % store users' events history
     end
     
     methods (Access = private)
         
-        % turn off all operation but creation
+        % set app ready for a new user
         function initialize(app)
+            % load all the history user info
+            users_history_file = fullfile(app.AssetsFolder, app.UsersHistoryFile);
+            if exist(users_history_file, "file")
+                app.UsersHistory = readtable(users_history_file, 'TextType', 'string');
+            else
+                app.UsersHistory = table;
+            end
+            % load all the history user events
+            events_history_file = fullfile(app.AssetsFolder, app.EventsHistoryFile);
+            if exist(events_history_file, "file")
+                app.EventsHistory = readtable(events_history_file, 'TextType', 'string');
+            else
+                app.EventsHistory = table;
+            end
+            % no user info
             app.UserId.Text = "未注册";
             app.UserName.Text = "未注册";
             app.UserSex.Text = "未注册";
             app.UserDob.Text = "未注册";
+            % enable creation but disable modification
             app.Create.Enable = "on";
             app.Modify.Enable = "off";
-            app.DigitPanel.Enable = "off";
-            app.DigitPracPC.Visible = "off";
-            app.WordPanel.Enable = "off";
-            app.WordPracPC.Visible = "off";
-            app.SpacePanel.Enable = "off";
-            app.SpacePracPC.Visible = "off";
+            % enable loading if history is not empty
+            if isempty(app.UsersHistory)
+                app.Load.Enable = "off";
+            else
+                app.Load.Enable = "on";
+            end
+            % disable all the experiment part because there is no user
+            arrayfun(@initPanel, ["Digit", "Word", "Space"])
+            % clear current user info
+            app.User = table;
+            % clear current user events
+            app.Events = table;
+            function initPanel(tasktype)
+                app.(tasktype + "Panel").Enable = "off";
+                app.(tasktype + "Prac").BackgroundColor = [0.96, 0.96, 0.96];
+                app.(tasktype + "PracPC").Visible = "off";
+                app.(tasktype + "Test").BackgroundColor = [0.96, 0.96, 0.96];
+            end
         end
         % functions used when running an experiment
         % a practice workflow
@@ -74,7 +102,7 @@ classdef StartExperiment < matlab.apps.AppBase
             [rec, status] = app.startExp(tasktype, "prac");
             app.colorStatus(tasktype, "prac", status);
             app.dispPC(tasktype, rec, status);
-            app.saveExpData(tasktype, "prac", rec, status)
+            app.outputExpData(tasktype, "prac", rec, status)
             app.appendEvent(tasktype_upper + "Prac");
             app.(tasktype_upper + "Test").Enable = "on";
         end
@@ -83,10 +111,14 @@ classdef StartExperiment < matlab.apps.AppBase
             tasktype_upper = app.capitalize_first(tasktype);
             [rec, status] = app.startExp(tasktype, "test");
             app.colorStatus(tasktype, "test", status);
-            app.saveExpData(tasktype, "test", rec, status)
-            app.appendEvent(tasktype_upper + "Test");
-            if status == 0
+            app.outputExpData(tasktype, "test", rec, status)
+            if status ~= 0
+                app.appendEvent(tasktype_upper + "TestError");
                 app.(tasktype_upper + "Test").Enable = "on";
+            else
+                app.appendEvent(tasktype_upper + "TestSucceed");
+                % when succeeded, the whole panel will be disabled
+                app.(tasktype_upper + "Panel").Enable = "off";
             end
         end
         % main stimuli presentation (this should be "Static", but no way?)
@@ -109,22 +141,24 @@ classdef StartExperiment < matlab.apps.AppBase
         % display percent of correct for practice part
         function dispPC(app, tasktype, rec, status)
             label_update = app.capitalize_first(tasktype) + "PracPC";
+            app.(label_update).Visible = "on";
             if status == 0
-                app.(label_update).Visible = "on";
                 pc = sum(rec.acc == 1) / sum(~isnan(rec.acc)) * 100;
-                if ~isnan(pc)
-                    app.(label_update).FontColor = "black";
-                    app.(label_update).Text = sprintf('正确率：%.0f%%', pc);
-                else
-                    app.(label_update).FontColor = "red";
-                    app.(label_update).Text = "请重新练习";
-                end
+            else
+                pc = nan;
+            end
+            if ~isnan(pc)
+                app.(label_update).FontColor = "black";
+                app.(label_update).Text = sprintf("正确率：%.0f%%", pc);
+            else
+                app.(label_update).FontColor = "red";
+                app.(label_update).Text = "请重新练习";
             end
         end
         % save the recorded responses (VERY IMPORTANT)
-        function saveExpData(app, tasktype, taskpart, rec, status)
+        function outputExpData(app, tasktype, taskpart, rec, status)
             data_file = sprintf('%s-Sub_%d-Task_%s-Part_%s', ...
-                app.ExperimentName, app.UserCurrent.Id, ...
+                app.ExperimentName, app.User.Id, ...
                 tasktype, taskpart);
             if status ~= 0
                 [~, temp_suffix] = fileparts(tempname);
@@ -134,68 +168,110 @@ classdef StartExperiment < matlab.apps.AppBase
         end
         % check completion
         function is_completed = checkCompletion(app)
-            check_events = ["DigitTest", "WordTest", "SpaceTest"];
-            is_completed = all(ismember(check_events, app.UserEvents));
+            check_events = ["DigitTestSucceed", "WordTestSucceed", "SpaceTestSucceed"];
+            is_completed = all(ismember(check_events, app.Events.Event));
         end
         % helper functions (these should be Static, but no way?)
         function str_out = capitalize_first(~, str_in)
-            str_out = upper(extractBefore(str_in, 2)) + ...
-                extractAfter(str_in, 1);
+            str_out = upper(extractBefore(str_in, 2)) + extractAfter(str_in, 1);
         end
         
     end
     
     methods (Access = public)
         
-        % user creation and updating
-        function updateUser(app, user)
-            % update current user info
+        % user edition
+        function createUser(app, user)
+            % add creation time
+            user.CreateTime = datetime("now");
+            % update user info
+            app.updateUser(user);
+        end
+        function updateUser(app, user, events)
+            % update current user info in panel and property
             app.UserId.Text = num2str(user.Id);
             app.UserName.Text = user.Name;
             app.UserSex.Text = user.Sex;
             app.UserDob.Text = datestr(user.Dob, 'yyyy-mm-dd');
-            app.UserCurrent = struct2table(user);
-            app.UserCurrent.createTime = app.UserCreateTime;
+            app.User.Id = user.Id;
+            app.User.Name = user.Name;
+            app.User.Sex = user.Sex;
+            app.User.Dob = user.Dob;
+            if ismember('CreateTime', fieldnames(user))
+                % add create time if there is one
+                app.User.CreateTime = user.CreateTime;
+            end
+            if nargin >= 3
+                app.Events = events;
+            end
         end
-        function createUser(app, user)
-            % set the user creation time
-            app.UserCreateTime = datetime("now");
-            % update user info
-            app.updateUser(user);
+        function found = loadUser(app, user_id, args)
+            arguments
+                app
+                user_id
+                args.Pull (1,1) {islogical} = true
+            end
+            % check if user exists
+            if isempty(app.UsersHistory) || ~ismember(user_id, app.UsersHistory.Id)
+                found = false;
+                user = table;
+                events = table;
+            else
+                found = true;
+                % get info from history
+                user = app.UsersHistory(app.UsersHistory.Id == user_id, :);
+                events = app.EventsHistory(app.EventsHistory.UserId == user_id, :);
+            end
+            if args.Pull
+                % update ui and data
+                app.updateUser(user, events);
+                % clear history
+                app.UsersHistory(app.UsersHistory.Id == user_id, :) = [];
+                app.EventsHistory(app.EventsHistory.UserId == user_id, :) = [];
+            end
         end
         % output for app use in future
-        function outputUsersHistory(app)
-            writetable(vertcat(app.UsersHistory, app.UserCurrent), ...
+        function saveUsersHistory(app)
+            writetable(vertcat(app.UsersHistory, app.User), ...
                 fullfile(app.AssetsFolder, app.UsersHistoryFile))
         end
+        function saveEventsHistory(app)
+            writetable(vertcat(app.EventsHistory, app.Events), ...
+                fullfile(app.AssetsFolder, app.EventsHistoryFile))
+        end
         % output for experimenter use
-        function saveUserHistory(app)
-            writetable(vertcat(app.UsersHistory, app.UserCurrent), ...
+        function outputUsersHistory(app)
+            writetable(vertcat(app.UsersHistory, app.User), ...
                 fullfile(app.DataFolder, "users"), ...
                 "FileType", "text", ...
                 "Delimiter", "\t")
         end
-        % append events to user events structure
+        % append events to user events table
         function appendEvent(app, event)
-            app.UserEvents = horzcat(app.UserEvents, event);
+            app.Events = vertcat(app.Events, ...
+                table(app.User.Id, event, ...
+                'VariableNames', {'UserId', 'Event'}));
+            % update history after a new meaningful event happened
+            if app.User.Id ~= 0
+                app.saveUsersHistory();
+                app.saveEventsHistory();
+                app.outputUsersHistory();
+            end
         end
         % set the app ready for experiment
         function getReady(app)
             % enable user modification and creation
             app.Create.Enable = "on";
             app.Modify.Enable = "on";
-            % enable all the practice
-            app.DigitPanel.Enable = "on";
-            app.DigitPrac.Enable = "on";
-            app.DigitTest.Enable = "off";
-            % enable all the practice
-            app.WordPanel.Enable = "on";
-            app.WordPrac.Enable = "on";
-            app.WordTest.Enable = "off";
-            % enable all the practice
-            app.SpacePanel.Enable = "on";
-            app.SpacePrac.Enable = "on";
-            app.SpaceTest.Enable = "off";
+            % enable experiment based on progress
+            arrayfun(@checkProgress, ["Digit", "Word", "Space"]);
+            function checkProgress(tasktype)
+                if ~ismember(tasktype + "TestSucceed", app.Events.Event)
+                    app.(tasktype + "Panel").Enable = "on";
+                    app.(tasktype + "Prac").Enable = "on";
+                    app.(tasktype + "Test").Enable = "off";
+                end
+            end
         end
         
     end
@@ -213,12 +289,6 @@ classdef StartExperiment < matlab.apps.AppBase
             if ~isfolder(app.DataFolder)
                 mkdir(app.DataFolder)
             end
-            history_file = fullfile(app.AssetsFolder, app.UsersHistoryFile);
-            if exist(history_file, "file")
-                app.UsersHistory = readtable(history_file, 'TextType', 'string');
-            else
-                app.UsersHistory = table;
-            end
             % initialize all the controllers
             app.initialize()
             % add user code directory
@@ -228,11 +298,11 @@ classdef StartExperiment < matlab.apps.AppBase
         % Close request function: UIFigure
         function UIFigureCloseRequest(app, event)
             % check if user has completed if there's already one user
-            if ~isempty(app.UserEvents) && app.UserCurrent.Id ~= 0 % user id 0 is of internal use
+            if ~isempty(app.Events) && app.User.Id ~= 0 % user id 0 is of internal use
                 is_completed = app.checkCompletion();
                 if ~is_completed
                     selection = uiconfirm(app.UIFigure, ...
-                        "当前用户还未完成所有测试，现在退出将导致当前用户不能继续测试，是否确认退出", "退出确认", ...
+                        "当前被试还未完成所有测试，是否确认退出", "退出确认", ...
                         "Options", ["是", "否"], ...
                         "DefaultOption", "否");
                     if selection == "否"
@@ -248,11 +318,11 @@ classdef StartExperiment < matlab.apps.AppBase
         % Button pushed function: Create
         function CreateButtonPushed(app, event)
             % check if user has completed if there's already one user
-            if ~isempty(app.UserEvents) && app.UserCurrent.Id ~= 0 % user id 0 is of internal use
+            if ~isempty(app.Events) && app.User.Id ~= 0 % user id 0 is of internal use
                 is_completed = app.checkCompletion();
                 if ~is_completed
                     selection = uiconfirm(app.UIFigure, ...
-                        "当前用户还未完成所有测试，新建用户将导致当前用户不能继续测试，是否继续新建", "新建确认", ...
+                        "当前被试还未完成所有测试，是否继续新建被试", "新建确认", ...
                         "Options", ["是", "否"], ...
                         "DefaultOption", "否");
                     if selection == "否"
@@ -262,8 +332,6 @@ classdef StartExperiment < matlab.apps.AppBase
             end
             % Create new user will trigger app initializing
             app.initialize();
-            % clear user events
-            app.UserEvents = [];
             % Disable creation while creating
             app.Create.Enable = "off";
             % Call app without user information
@@ -275,19 +343,37 @@ classdef StartExperiment < matlab.apps.AppBase
 
         % Button pushed function: Modify
         function ModifyButtonPushed(app, event)
-            % Disable creation and modification while modifying
+            % Disable modification while modifying
             app.Modify.Enable = "off";
-            app.Create.Enable = "off";
-            % a quick collection of user information
-            user.Id = str2double(app.UserId.Text);
-            user.Name = app.UserName.Text;
-            user.Sex = app.UserSex.Text;
-            user.Dob = datetime(app.UserDob.Text);
-            app.DialogEditUser = CreateOrModifyUser(app, user);
-            % Enable creation and modification after calling
+            app.DialogEditUser = CreateOrModifyUser(app, app.User);
+            % Enable modification after modifying
             waitfor(app.DialogEditUser.UIFigure)
-            app.Create.Enable = "on";
             app.Modify.Enable = "on";
+        end
+
+        % Button pushed function: Load
+        function LoadButtonPushed(app, event)
+            % check if user has completed if there's already one user
+            if ~isempty(app.Events) && app.User.Id ~= 0 % user id 0 is of internal use
+                is_completed = app.checkCompletion();
+                if ~is_completed
+                    selection = uiconfirm(app.UIFigure, ...
+                        "当前被试还未完成所有测试，是否继续导入已有用户", "导入确认", ...
+                        "Options", ["是", "否"], ...
+                        "DefaultOption", "否");
+                    if selection == "否"
+                        return
+                    end
+                end
+            end
+            % Load old user will trigger app initializing
+            app.initialize();
+            % Disable loading while loading
+            app.Load.Enable = "off";
+            app.DialogLoadUser = LoadUser(app, app.UsersHistory, app.EventsHistory);
+            % Enable loading after loading
+            waitfor(app.DialogLoadUser.UIFigure)
+            app.Load.Enable = "on";
         end
 
         % Button pushed function: DigitPrac
@@ -388,7 +474,7 @@ classdef StartExperiment < matlab.apps.AppBase
             app.Modify.ButtonPushedFcn = createCallbackFcn(app, @ModifyButtonPushed, true);
             app.Modify.FontName = 'SimHei';
             app.Modify.FontSize = 15;
-            app.Modify.Position = [33 50 88 26];
+            app.Modify.Position = [30 56 88 26];
             app.Modify.Text = '修改';
 
             % Create UserInfoLabel
@@ -403,7 +489,7 @@ classdef StartExperiment < matlab.apps.AppBase
             app.Create.ButtonPushedFcn = createCallbackFcn(app, @CreateButtonPushed, true);
             app.Create.FontName = 'SimHei';
             app.Create.FontSize = 15;
-            app.Create.Position = [144 50 88 26];
+            app.Create.Position = [141 56 88 26];
             app.Create.Text = '新建';
 
             % Create UserIdLabel
@@ -420,6 +506,14 @@ classdef StartExperiment < matlab.apps.AppBase
             app.UserId.FontSize = 15;
             app.UserId.Position = [103 201 101 22];
             app.UserId.Text = '未注册';
+
+            % Create Load
+            app.Load = uibutton(app.ParticipantInfoPanel, 'push');
+            app.Load.ButtonPushedFcn = createCallbackFcn(app, @LoadButtonPushed, true);
+            app.Load.FontName = 'SimHei';
+            app.Load.FontSize = 15;
+            app.Load.Position = [86 14 88 26];
+            app.Load.Text = '导入';
 
             % Create DigitPanel
             app.DigitPanel = uipanel(app.UIFigure);

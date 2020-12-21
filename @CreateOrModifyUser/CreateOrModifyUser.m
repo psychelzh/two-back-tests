@@ -30,7 +30,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             % input values validation
             if app.UserId.Value == 0
                 selection = uiconfirm(app.UIFigure, ...
-                    "编号0为内部测试用户，用户不会被记录，且只记录最近一次作答数据，是否继续？", "编号确认", ...
+                    "编号0为内部使用，其信息不会被记录，且只记录最近一次作答数据，是否继续？", "编号确认", ...
                     "Options", ["确认", "取消"], ...
                     "DefaultOption", "取消", ...
                     "Icon", "warning");
@@ -41,7 +41,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             end
             if isempty(app.UserName.Value)
                 selection = uiconfirm(app.UIFigure, ...
-                    "用户姓名未填写，是否返回填写", "姓名缺失", ...
+                    "被试姓名未填写，是否返回填写", "姓名缺失", ...
                     "Options", ["确认", "取消"], ...
                     "DefaultOption", "确认", ...
                     "Icon", "warning");
@@ -74,11 +74,6 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
                     app.CallingApp.updateUser(user);
                     app.CallingApp.appendEvent("Modified");
             end
-            % do not store user of id 0 (for internal use)
-            if user.Id ~= 0
-                app.CallingApp.outputUsersHistory();
-                app.CallingApp.saveUserHistory();
-            end
         end
     end
     
@@ -109,9 +104,9 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             if app.IsChanged
                 switch app.CallingMethod
                     case "Creation"
-                        msg = "是否录入当前用户信息？";
+                        msg = "是否录入当前被试信息？";
                     case "Modification"
-                        msg = "是否修改当前用户信息？";
+                        msg = "是否修改当前被试信息？";
                 end
                 exit_confirm = uiconfirm(app.UIFigure, ...
                     msg, "退出确认",  ...
@@ -141,30 +136,11 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
         % Value changed function: UserId
         function UserIdValueChanged(app, event)
             app.IsChanged = true;
-            if ~isempty(app.CallingApp.UsersHistory)
-                is_used = ismember(event.Value, app.CallingApp.UsersHistory.Id);
-            else
-                is_used = false;
-            end
-            if is_used
-                switch app.CallingMethod
-                    case "Creation"
-                        selection = uiconfirm(app.UIFigure, ...
-                            "当前编号已经使用过，请选择操作：", "编号重复", ...
-                            "Options", ["删除旧被试并继续", "返回重新输入"], ...
-                            "DefaultOption", "返回重新输入");
-                        switch selection
-                            case "删除旧被试并继续"
-                                app.CallingApp.UsersHistory(is_used, :) = [];
-                            case "返回重新输入"
-                                app.UserId.Value = 0;
-                        end
-                    case "Modification"
-                        uialert(app.UIFigure, ...
-                            "不允许修改为已有用户的编号", "编号重复", ...
-                            "Icon", "error")
-                        app.UserId.Value = app.CallingUserId;
-                end
+            if app.CallingApp.loadUser(event.Value, "Pull", false)
+                uialert(app.UIFigure, ...
+                    "不允许使用已有被试的编号", "编号重复", ...
+                    "Icon", "error")
+                app.UserId.Value = app.CallingUserId;
             end
         end
 
