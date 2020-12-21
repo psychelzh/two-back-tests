@@ -57,15 +57,6 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             end
         end
         
-        function loadUser(app, user_id)
-            % get user history by main app
-            [~, user] = app.CallingApp.retrieveUser(user_id, "Pull", true);
-            app.UserId.Value = user.Id;
-            app.UserName.Value = user.Name;
-            app.UserSex.Value = user.Sex;
-            app.UserDob.Value = user.Dob;
-        end
-        
         function pushUser(app)
             % collect user info into a struct
             user.Id = app.UserId.Value;
@@ -151,7 +142,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
         % Value changed function: UserId
         function UserIdValueChanged(app, event)
             app.IsChanged = true;
-            if app.CallingApp.retrieveUser(event.Value)
+            if app.CallingApp.loadUser(event.Value, "Pull", false)
                 switch app.CallingMethod
                     case "Creation"
                         selection = uiconfirm(app.UIFigure, ...
@@ -160,7 +151,10 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
                             "DefaultOption", "返回重新输入");
                         switch selection
                             case "载入旧被试并继续"
-                                app.loadUser(event.Value);
+                                app.CallingApp.loadUser(event.Value);
+                                app.CallingApp.appendEvent("Loaded");
+                                app.CallingApp.getReady();
+                                delete(app)
                             case "返回重新输入"
                                 app.UserId.Value = 0;
                         end
