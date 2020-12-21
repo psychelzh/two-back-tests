@@ -165,10 +165,10 @@ classdef StartExperiment < matlab.apps.AppBase
         
         % user edition
         function createUser(app, user)
+            % add creation time
+            user.CreateTime = datetime("now");
             % update user info
             app.updateUser(user);
-            % add creation time
-            app.User.CreateTime = datetime("now");
         end
         function updateUser(app, user, events)
             % update current user info in panel and property
@@ -180,6 +180,10 @@ classdef StartExperiment < matlab.apps.AppBase
             app.User.Name = user.Name;
             app.User.Sex = user.Sex;
             app.User.Dob = user.Dob;
+            if ismember('CreateTime', fieldnames(user))
+                % add create time if there is one
+                app.User.CreateTime = user.CreateTime;
+            end
             if nargin >= 3
                 app.Events = events;
             end
