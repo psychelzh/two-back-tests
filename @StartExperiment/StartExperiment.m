@@ -324,13 +324,11 @@ classdef StartExperiment < matlab.apps.AppBase
 
         % Button pushed function: Modify
         function ModifyButtonPushed(app, event)
-            % Disable creation and modification while modifying
+            % Disable modification while modifying
             app.Modify.Enable = "off";
-            app.Create.Enable = "off";
             app.DialogEditUser = CreateOrModifyUser(app, app.User);
-            % Enable creation and modification after calling
+            % Enable modification after modifying
             waitfor(app.DialogEditUser.UIFigure)
-            app.Create.Enable = "on";
             app.Modify.Enable = "on";
         end
 
