@@ -34,7 +34,8 @@ classdef StartExperiment < matlab.apps.AppBase
     end
 
     properties (Access = private)
-        DialogEditUser % User information editing
+        DialogEditUser % Child UI: user information editing
+        DialogLoadUser % Child UI: load old user
         UsersHistory % users load from disk
         EventsHistory % users' events load from disk
         User % store the info of current user
@@ -164,8 +165,14 @@ classdef StartExperiment < matlab.apps.AppBase
     
     methods (Access = public)
         
-        % user creation and updating
-        function updateUser(app, user)
+        % user edition
+        function createUser(app, user)
+            % update user info
+            app.updateUser(user);
+            % add creation time
+            app.User.CreateTime = datetime("now");
+        end
+        function updateUser(app, user, events)
             % update current user info in panel and property
             app.UserId.Text = num2str(user.Id);
             app.UserName.Text = user.Name;
@@ -175,12 +182,34 @@ classdef StartExperiment < matlab.apps.AppBase
             app.User.Name = user.Name;
             app.User.Sex = user.Sex;
             app.User.Dob = user.Dob;
+            if nargin >= 3
+                app.Events = events;
+            end
         end
-        function createUser(app, user)
-            % update user info
-            app.updateUser(user);
-            % add creation time
-            app.User.CreateTime = datetime("now");
+        function found = loadUser(app, user_id, args)
+            arguments
+                app
+                user_id
+                args.Pull (1,1) {islogical} = true
+            end
+            % check if user exists
+            if isempty(app.UsersHistory) || ~ismember(user_id, app.UsersHistory.Id)
+                found = false;
+                user = table;
+                events = table;
+            else
+                found = true;
+                % get info from history
+                user = app.UsersHistory(app.UsersHistory.Id == user_id, :);
+                events = app.EventsHistory(app.EventsHistory.UserId == user_id, :);
+            end
+            if args.Pull
+                % update ui and data
+                app.updateUser(user, events);
+                % clear history
+                app.UsersHistory(app.UsersHistory.Id == user_id, :) = [];
+                app.EventsHistory(app.EventsHistory.UserId == user_id, :) = [];
+            end
         end
         % output for app use in future
         function saveUsersHistory(app)
@@ -203,33 +232,6 @@ classdef StartExperiment < matlab.apps.AppBase
             app.Events = vertcat(app.Events, ...
                 table(app.User.Id, event, ...
                 'VariableNames', {'UserId', 'Event'}));
-        end
-        % retrieve user from history
-        function [found, user, user_events] = retrieveUser(app, user_id, args)
-            arguments
-                app
-                user_id
-                args.Pull (1,1) {islogical} = false
-            end
-            % check if user exists
-            if isempty(app.UsersHistory) || ~ismember(user_id, app.UsersHistory.Id)
-                found = false;
-                user = table;
-                user_events = table;
-            else
-                found = true;
-                % get info from history
-                user = app.UsersHistory(app.UsersHistory.Id == user_id, :);
-                user_events = app.EventsHistory(app.EventsHistory.UserId == user_id, :);
-            end
-            if args.Pull
-                % setup for current app
-                app.User = user;
-                app.Events = user_events;
-                % clear history
-                app.UsersHistory(app.UsersHistory.Id == user_id, :) = [];
-                app.EventsHistory(app.EventsHistory.UserId == user_id, :) = [];
-            end
         end
         % set the app ready for experiment
         function getReady(app)
@@ -336,6 +338,31 @@ classdef StartExperiment < matlab.apps.AppBase
             % Enable modification after modifying
             waitfor(app.DialogEditUser.UIFigure)
             app.Modify.Enable = "on";
+        end
+
+        % Button pushed function: Load
+        function LoadButtonPushed(app, event)
+            % check if user has completed if there's already one user
+            if ~isempty(app.Events) && app.User.Id ~= 0 % user id 0 is of internal use
+                is_completed = app.checkCompletion();
+                if ~is_completed
+                    selection = uiconfirm(app.UIFigure, ...
+                        "当前被试还未完成所有测试，是否继续导入已有用户", "导入确认", ...
+                        "Options", ["是", "否"], ...
+                        "DefaultOption", "否");
+                    if selection == "否"
+                        return
+                    end
+                end
+            end
+            % Load old user will trigger app initializing
+            app.initialize();
+            % Disable loading while loading
+            app.Load.Enable = "off";
+            app.DialogLoadUser = LoadUser(app, app.UsersHistory, app.EventsHistory);
+            % Enable loading after loading
+            waitfor(app.DialogLoadUser.UIFigure)
+            app.Load.Enable = "on";
         end
 
         % Button pushed function: DigitPrac
