@@ -87,7 +87,6 @@ classdef StartExperiment < matlab.apps.AppBase
             app.dispPC(tasktype, rec, status);
             app.outputExpData(tasktype, "prac", rec, status)
             app.appendEvent(tasktype_upper + "Prac");
-            app.saveEventsHistory();
             app.(tasktype_upper + "Test").Enable = "on";
         end
         % a test workflow
@@ -104,7 +103,6 @@ classdef StartExperiment < matlab.apps.AppBase
                 % when succeeded, the whole panel will be disabled
                 app.(tasktype_upper + "Panel").Enable = "off";
             end
-            app.saveEventsHistory();
         end
         % main stimuli presentation (this should be "Static", but no way?)
         function [rec, status] = startExp(~, tasktype, taskpart)
@@ -232,6 +230,12 @@ classdef StartExperiment < matlab.apps.AppBase
             app.Events = vertcat(app.Events, ...
                 table(app.User.Id, event, ...
                 'VariableNames', {'UserId', 'Event'}));
+            % update history after a new meaningful event happened
+            if app.User.Id ~= 0
+                app.saveUsersHistory();
+                app.saveEventsHistory();
+                app.outputUsersHistory();
+            end
         end
         % set the app ready for experiment
         function getReady(app)
