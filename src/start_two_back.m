@@ -72,17 +72,17 @@ try % error proof programming
     % set default font name and size
     Screen('TextFont', window_ptr, 'SimHei');
     Screen('TextSize', window_ptr, 128);
-    
+
     % ---- timing information ----
     % get inter flip interval
     ifi = Screen('GetFlipInterval', window_ptr);
-    
+
     % ---- keyboard settings ----
     keys.start = KbName('s');
     keys.exit = KbName('Escape');
     keys.left = KbName('LeftArrow');
     keys.right = KbName('RightArrow');
-    
+
     % ---- present stimuli ----
     % display welcome screen and wait for a press of 's' to start
     [welcome_img, ~, welcome_alpha] = ...
