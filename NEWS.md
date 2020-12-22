@@ -1,3 +1,7 @@
+# 0.0.4
+
+* Enhance code quality.
+
 # 0.0.3
 
 * Add support for upgrading the whole experiment based on github tags.
