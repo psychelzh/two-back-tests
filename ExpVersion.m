@@ -1,3 +1,4 @@
 % a simple construction of version
-% TODO: deal it with functions (maybe not necessary)
-'0.0.2'
+function ver = ExpVersion()
+% major.minor.patch
+ver = '0.0.3';
