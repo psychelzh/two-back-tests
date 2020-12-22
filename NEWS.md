@@ -1,3 +1,7 @@
+# 0.0.2.9000 [in develop]
+
+* Add support for upgrading the whole experiment based on github tags.
+
 # 0.0.2
 
 * Fix an error occured when inserting an old user id in creation.
