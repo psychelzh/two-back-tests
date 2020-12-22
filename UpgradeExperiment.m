@@ -51,9 +51,10 @@ if status == 0
             case "yes"
                 fprintf('A new version (%s) of expriment is found, will try to upgrade now.\n', newver)
                 page_newver = sprintf('%s/archive/%s.zip', path_repo, newver);
+                temp_newzip = fullfile(tempdir, 'new.zip');
                 try
                     fprintf('Start downloading...')
-                    file_new = websave('new.zip', page_newver);
+                    websave(temp_newzip, page_newver);
                     fprintf('Completed.\n')
                 catch ME
                     if strcmp(ME.identifier, 'MATLAB:webservices:HTTP404StatusCodeError')
@@ -63,16 +64,15 @@ if status == 0
                         status = 2;
                     end
                 end
-                temp_newfolder = tempdir;
-                unzip(file_new, temp_newfolder)
-                delete(file_new)
+                unzip(temp_newzip, tempdir)
                 fprintf('Upgrading...')
-                copy_folder = fullfile(temp_newfolder, sprintf('%s-%s', repo_name, newver));
+                copy_folder = fullfile(tempdir, sprintf('%s-%s', repo_name, newver));
                 try
                     copyfile(copy_folder, '.')
                 catch
                     status = 3;
                 end
+                delete(temp_newzip)
                 rmdir(copy_folder, 's')
                 fprintf('Completed.\n')
             case "no"
