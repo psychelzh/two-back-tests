@@ -88,6 +88,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             if ~exist('user', 'var')
                 app.CallingMethod = "Creation";
                 app.MainTitle.Text = '新建被试';
+                app.CallingUserId = 0;
             else
                 app.CallingMethod = "Modification";
                 app.MainTitle.Text = '修改信息';
