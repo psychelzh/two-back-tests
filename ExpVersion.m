@@ -1,3 +1,3 @@
 % a simple construction of version
 % TODO: deal it with functions (maybe not necessary)
-'0.0.1'
+'0.0.2'

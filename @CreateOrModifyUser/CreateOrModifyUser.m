@@ -88,6 +88,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
             if ~exist('user', 'var')
                 app.CallingMethod = "Creation";
                 app.MainTitle.Text = '新建被试';
+                app.CallingUserId = 0;
             else
                 app.CallingMethod = "Modification";
                 app.MainTitle.Text = '修改信息';
@@ -113,7 +114,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
                     "Options", ["是", "否"], ...
                     "DefaultOption", "否");
                 if exit_confirm == "是"
-                    % update user info in main app
+                    % update user info before exiting
                     ok = app.validateInfo();
                     if ~ok, return; end
                     app.pushUser();
@@ -125,7 +126,7 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
         % Button pushed function: Confirm
         function ConfirmButtonPushed(app, event)
             if app.IsChanged
-                % ensure values are valid and set up main app before exiting
+                % update user info before exiting
                 ok = app.validateInfo();
                 if ~ok, return; end
                 app.pushUser();
