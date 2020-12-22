@@ -1,4 +1,4 @@
-# 0.0.2.9000 [in develop]
+# 0.0.3
 
 * Add support for upgrading the whole experiment based on github tags.
 
