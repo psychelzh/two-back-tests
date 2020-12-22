@@ -1,3 +1,7 @@
+# 0.0.2
+
+* Fix an error occured when inserting an old user id in creation.
+
 # 0.0.1
 
 * Fix bug of [#1](https://github.com/psychelzh/two-back-tests/issues/1), now the stimuli display lasts for 2 seconds.
