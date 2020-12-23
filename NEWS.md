@@ -1,3 +1,7 @@
+# 0.0.6
+
+* Support auto-upgrade on experiment startup.
+
 # 0.0.4
 
 * Enhance code quality.
