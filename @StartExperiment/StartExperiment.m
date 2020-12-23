@@ -135,7 +135,7 @@ classdef StartExperiment < matlab.apps.AppBase
             if status == 0
                 app.(calling).BackgroundColor = "green";
             else
-                app.(Calling).BackgroundColor = "red";
+                app.(calling).BackgroundColor = "red";
             end
         end
         % display percent of correct for practice part
