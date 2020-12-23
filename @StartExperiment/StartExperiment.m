@@ -135,7 +135,7 @@ classdef StartExperiment < matlab.apps.AppBase
             if status == 0
                 app.(calling).BackgroundColor = "green";
             else
-                app.(Calling).BackgroundColor = "red";
+                app.(calling).BackgroundColor = "red";
             end
         end
         % display percent of correct for practice part
@@ -281,6 +281,8 @@ classdef StartExperiment < matlab.apps.AppBase
 
         % Code that executes after component creation
         function startupFcn(app)
+            % check if there is a newer version and install it
+            UpgradeExperiment();
             % make sure app data folder is existing
             if ~isfolder(app.AssetsFolder)
                 mkdir(app.AssetsFolder)
