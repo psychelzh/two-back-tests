@@ -42,6 +42,7 @@ catch ME
     end
 end
 if status == 0
+    % do some basic webscraping to extract all the tags of the repo
     tags = regexprep( ...
         extractBetween( ...
         extractBetween(data_tags, ...
@@ -49,12 +50,14 @@ if status == 0
         '<span class="hidden-text-expander inline">'), ...
         '>', '<'), ...
         '\s', '');
+    % latest tagged version appears first
     latestver = tags{1};
     if string(latestver) > string(curver)
         foundnewer = true;
         switch args.InstallNow
             case "yes"
                 fprintf('A new version (%s) of expriment is found, will try to upgrade now.\n', latestver)
+                % download the files of the latest version to temp dir
                 page_newver = sprintf('%s/archive/%s.zip', path_repo, latestver);
                 temp_newzip = fullfile(tempdir, 'new.zip');
                 try
@@ -70,6 +73,7 @@ if status == 0
                     end
                 end
                 unzip(temp_newzip, tempdir)
+                % copy the upzipped files to working directory
                 fprintf('Upgrading...')
                 copy_folder = fullfile(tempdir, sprintf('%s-%s', repo_name, latestver));
                 try
@@ -77,9 +81,10 @@ if status == 0
                 catch
                     status = 3;
                 end
+                fprintf('Completed.\n')
+                % remove all files we generated in temp dir
                 delete(temp_newzip)
                 rmdir(copy_folder, 's')
-                fprintf('Completed.\n')
             case "no"
                 fprintf('A new version (%s) of expriment is found, please run `%s` to upgrade.\n', latestver, mfilename)
         end
