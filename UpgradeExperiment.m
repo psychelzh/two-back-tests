@@ -2,7 +2,7 @@ function varargout = UpgradeExperiment(args)
 %UPGRADEEXPERIMENT Fetch lastest release from github
 %   This will just check if there is a newer version of this experiment and
 %   fetch all the required files of this newer version from github.
-%   
+%
 %   Example usage:
 %
 %     % this will check if there is a new version only
@@ -33,15 +33,6 @@ fprintf('Checking if there is a newer version...\n')
 try
     % get the latest tag
     data_tags = webread(page_tags);
-catch ME
-    if strcmp(ME.identifier, 'MATLAB:webservices:HTTP404StatusCodeError')
-        status = 1;
-    end
-    if strcmp(ME.identifier, 'MATLAB:webservices:UnknownHost')
-        status = 2;
-    end
-end
-if status == 0
     % do some basic webscraping to extract all the tags of the repo
     tags = regexprep( ...
         extractBetween( ...
@@ -60,27 +51,13 @@ if status == 0
                 % download the files of the latest version to temp dir
                 page_newver = sprintf('%s/archive/%s.zip', path_repo, latestver);
                 temp_newzip = fullfile(tempdir, 'new.zip');
-                try
-                    fprintf('Start downloading...')
-                    websave(temp_newzip, page_newver);
-                    fprintf('Completed.\n')
-                catch ME
-                    if strcmp(ME.identifier, 'MATLAB:webservices:HTTP404StatusCodeError')
-                        status = 1;
-                    end
-                    if strcmp(ME.identifier, 'MATLAB:webservices:UnknownHost')
-                        status = 2;
-                    end
-                end
+                fprintf('Start downloading...')
+                websave(temp_newzip, page_newver);
                 unzip(temp_newzip, tempdir)
                 % copy the upzipped files to working directory
                 fprintf('Upgrading...')
                 copy_folder = fullfile(tempdir, sprintf('%s-%s', repo_name, latestver));
-                try
-                    copyfile(copy_folder, '.')
-                catch
-                    status = 3;
-                end
+                copyfile(copy_folder, '.')
                 fprintf('Completed.\n')
                 % remove all files we generated in temp dir
                 delete(temp_newzip)
@@ -91,19 +68,21 @@ if status == 0
     else
         fprintf('You are awesome! Current version (%s) you used is the latest.\n', curver)
     end
-end
-% turn error as meaning warning
-if status == 1
-    warning('Experiment:Upgrade:NotFound', ...
-        'Upgrade failed! Some of the requested web pages not found.')
-end
-if status == 2
-    warning('Experiment:Upgrade:NetFailure', ...
-        'Upgrade failed! Please check your network and make sure you have access to %s.', gh_host)
-end
-if status == 3
-    warning('Experiment:Upgrade:InstallError', ...
-        'Upgrade failed! Something unexpected happened when copying download files.')
+catch ME
+    % turn error as meaning warning
+    if strcmp(ME.identifier, 'MATLAB:webservices:HTTP404StatusCodeError')
+        status = 1;
+        warning('Experiment:Upgrade:NotFound', ...
+            'Upgrade failed! Some of the requested web pages not found.')
+    elseif strcmp(ME.identifier, 'MATLAB:webservices:UnknownHost')
+        status = 2;
+        warning('Experiment:Upgrade:NetFailure', ...
+            'Upgrade failed! Please check your network and make sure you have access to %s.', gh_host)
+    else
+        status = 3;
+        warning('Experiment:Upgrade:InstallError', ...
+            'Upgrade failed! Something unexpected happened.')
+    end
 end
 % output if required
 if nargout > 0
