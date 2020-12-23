@@ -12,14 +12,18 @@ function varargout = UpgradeExperiment(args)
 %     UpgradeExperiment
 %     UpgradeExperiment("InstallNow", "yes")
 %
-%     % the newer version number, older version number and the status
-%     % number are the first second and third outputs respectively
-%     [newver, oldver, status] = UpgradeExperiment(__);
+%     % flag indicating newer version is found, latest version number and
+%     % the status number are the three supported outputs respectively, and
+%     % a status of 0 means succeeded, otherwise not
+%     [foundnewer, latestver, status] = UpgradeExperiment(__);
 arguments
     args.InstallNow {mustBeMember(args.InstallNow, ["yes", "no"])} = "yes"
 end
+% if a newer version has been found
+foundnewer = false;
+% return status, 0 means no error
 status = 0;
-oldver = ExpVersion;
+curver = ExpVersion;
 gh_host = 'https://github.com';
 gh_handle = 'psychelzh';
 repo_name = 'two-back-tests';
@@ -45,12 +49,13 @@ if status == 0
         '<span class="hidden-text-expander inline">'), ...
         '>', '<'), ...
         '\s', '');
-    newver = tags{1};
-    if string(newver) > string(oldver)
+    latestver = tags{1};
+    if string(latestver) > string(curver)
+        foundnewer = true;
         switch args.InstallNow
             case "yes"
-                fprintf('A new version (%s) of expriment is found, will try to upgrade now.\n', newver)
-                page_newver = sprintf('%s/archive/%s.zip', path_repo, newver);
+                fprintf('A new version (%s) of expriment is found, will try to upgrade now.\n', latestver)
+                page_newver = sprintf('%s/archive/%s.zip', path_repo, latestver);
                 temp_newzip = fullfile(tempdir, 'new.zip');
                 try
                     fprintf('Start downloading...')
@@ -66,7 +71,7 @@ if status == 0
                 end
                 unzip(temp_newzip, tempdir)
                 fprintf('Upgrading...')
-                copy_folder = fullfile(tempdir, sprintf('%s-%s', repo_name, newver));
+                copy_folder = fullfile(tempdir, sprintf('%s-%s', repo_name, latestver));
                 try
                     copyfile(copy_folder, '.')
                 catch
@@ -76,10 +81,10 @@ if status == 0
                 rmdir(copy_folder, 's')
                 fprintf('Completed.\n')
             case "no"
-                fprintf('A new version (%s) of expriment is found, please run `%s` to upgrade.\n', newver, mfilename)
+                fprintf('A new version (%s) of expriment is found, please run `%s` to upgrade.\n', latestver, mfilename)
         end
     else
-        fprintf('You are awesome! Current version (%s) you used is the latest.\n', oldver)
+        fprintf('You are awesome! Current version (%s) you used is the latest.\n', curver)
     end
 end
 % turn error as meaning warning
@@ -95,11 +100,12 @@ if status == 3
     warning('Experiment:Upgrade:InstallError', ...
         'Upgrade failed! Something unexpected happened when copying download files.')
 end
+% output if required
 if nargout > 0
-    varargout{1} = newver;
+    varargout{1} = foundnewer;
 end
 if nargout > 1
-    varargout{2} = oldver;
+    varargout{2} = latestver;
 end
 if nargout > 2
     varargout{3} = status;
