@@ -3,16 +3,16 @@ classdef CreateOrModifyUser < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         UIFigure   matlab.ui.Figure
-        MainTitle  matlab.ui.control.Label
-        Label      matlab.ui.control.Label
-        UserId     matlab.ui.control.NumericEditField
-        Label_2    matlab.ui.control.Label
-        UserName   matlab.ui.control.EditField
-        Label_3    matlab.ui.control.Label
-        UserSex    matlab.ui.control.DropDown
-        Label_4    matlab.ui.control.Label
-        UserDob    matlab.ui.control.DatePicker
         Confirm    matlab.ui.control.Button
+        UserDob    matlab.ui.control.DatePicker
+        Label_4    matlab.ui.control.Label
+        UserSex    matlab.ui.control.DropDown
+        Label_3    matlab.ui.control.Label
+        UserName   matlab.ui.control.EditField
+        Label_2    matlab.ui.control.Label
+        UserId     matlab.ui.control.NumericEditField
+        Label      matlab.ui.control.Label
+        MainTitle  matlab.ui.control.Label
     end
 
     

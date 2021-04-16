@@ -3,9 +3,9 @@ classdef LoadUser < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         UIFigure     matlab.ui.Figure
-        UserHistory  matlab.ui.control.Table
-        Title        matlab.ui.control.Label
         Confirm      matlab.ui.control.Button
+        Title        matlab.ui.control.Label
+        UserHistory  matlab.ui.control.Table
     end
 
     

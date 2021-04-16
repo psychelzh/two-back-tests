@@ -3,34 +3,34 @@ classdef StartExperiment < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         UIFigure              matlab.ui.Figure
-        ParticipantInfoPanel  matlab.ui.container.Panel
-        UserNameLabel         matlab.ui.control.Label
-        UserSexLabel          matlab.ui.control.Label
-        UserDobLabel          matlab.ui.control.Label
-        UserName              matlab.ui.control.Label
-        UserSex               matlab.ui.control.Label
-        UserDob               matlab.ui.control.Label
-        Modify                matlab.ui.control.Button
-        UserInfoLabel         matlab.ui.control.Label
-        Create                matlab.ui.control.Button
-        UserIdLabel           matlab.ui.control.Label
-        UserId                matlab.ui.control.Label
-        Load                  matlab.ui.control.Button
-        DigitPanel            matlab.ui.container.Panel
-        DigitPrac             matlab.ui.control.Button
-        DigitTest             matlab.ui.control.Button
-        DigitLabel            matlab.ui.control.Label
-        DigitPracPC           matlab.ui.control.Label
-        WordPanel             matlab.ui.container.Panel
-        WordPrac              matlab.ui.control.Button
-        WordTest              matlab.ui.control.Button
-        WordLabel             matlab.ui.control.Label
-        WordPracPC            matlab.ui.control.Label
         SpacePanel            matlab.ui.container.Panel
-        SpacePrac             matlab.ui.control.Button
-        SpaceTest             matlab.ui.control.Button
-        SpaceLabel            matlab.ui.control.Label
         SpacePracPC           matlab.ui.control.Label
+        SpaceLabel            matlab.ui.control.Label
+        SpaceTest             matlab.ui.control.Button
+        SpacePrac             matlab.ui.control.Button
+        WordPanel             matlab.ui.container.Panel
+        WordPracPC            matlab.ui.control.Label
+        WordLabel             matlab.ui.control.Label
+        WordTest              matlab.ui.control.Button
+        WordPrac              matlab.ui.control.Button
+        DigitPanel            matlab.ui.container.Panel
+        DigitPracPC           matlab.ui.control.Label
+        DigitLabel            matlab.ui.control.Label
+        DigitTest             matlab.ui.control.Button
+        DigitPrac             matlab.ui.control.Button
+        ParticipantInfoPanel  matlab.ui.container.Panel
+        Load                  matlab.ui.control.Button
+        UserId                matlab.ui.control.Label
+        UserIdLabel           matlab.ui.control.Label
+        Create                matlab.ui.control.Button
+        UserInfoLabel         matlab.ui.control.Label
+        Modify                matlab.ui.control.Button
+        UserDob               matlab.ui.control.Label
+        UserSex               matlab.ui.control.Label
+        UserName              matlab.ui.control.Label
+        UserDobLabel          matlab.ui.control.Label
+        UserSexLabel          matlab.ui.control.Label
+        UserNameLabel         matlab.ui.control.Label
     end
 
     properties (Access = private)
